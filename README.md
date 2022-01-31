@@ -1,2 +1,5 @@
-# TeX
-📄 A collection of my TeX libraries. 
+# tex templates
+Personal LaTeX document class files. 
+
+## Usage
+Coming soon?
