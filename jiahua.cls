@@ -6,8 +6,9 @@
 % 
 % Mainly used for homework and class notes. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{jiahua}[2022/01/29 Jiahua's Template]
+\ProvidesClass{jiahua}[2022/01/31 Jiahua's Template]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% options %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newif\ifanon
@@ -24,119 +25,112 @@
 \nodatefalse
 \DeclareOption{nodate}{\nodatetrue}
 
-% Problem set styles
-\newif\ifpset
-\psetfalse
-\DeclareOption{pset}{\psettrue}
-
-% New page break for gradescope
-\newif\ifgradescope
-\gradescopefalse
-\DeclareOption{gradescope}{\gradescopetrue}
-
 % Section numbering
 \newif\ifrawnumbering
 \rawnumberingtrue
 \newif\ifsectionnumbering
 \sectionnumberingfalse
 \DeclareOption{sections}{
-	\sectionnumberingtrue
-	\subsectionnumberingfalse
-	\rawnumberingfalse
+    \sectionnumberingtrue
+    \subsectionnumberingfalse
+    \rawnumberingfalse
 }
 \newif\ifsubsectionnumbering
 \subsectionnumberingfalse
 \DeclareOption{subsections}{
-	\sectionnumberingfalse
-	\subsectionnumberingtrue
-	\rawnumberingfalse
+    \sectionnumberingfalse
+    \subsectionnumberingtrue
+    \rawnumberingfalse
 }
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% preamble %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Base class
-\LoadClass{article}
+% Base class, uses KOMA-Script. 
+\LoadClass[parskip]{scrartcl}
 
 % Language
 \RequirePackage[english]{babel}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{microtype}
 
+% Math
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{thmtools}
+
 % Metadata
 \RequirePackage{titling}
 \setlength{\droptitle}{-2cm}
 \pretitle{\begin{center}\sffamily\bfseries\LARGE}
 \preauthor{\begin{center}
-	\large\sffamily \lineskip 0.5em%
-	\begin{tabular}[t]{c}}
+    \large\sffamily \lineskip 0.5em%
+    \begin{tabular}[t]{c}}
 \predate{\begin{center}\sffamily\large}
 \RequirePackage{abstract}
 \renewcommand\abstractnamefont{\sffamily}
 
 \ifanon
-	\author{}
+    \author{}
 \else
-	\author{Jiahua Chen}
+    \author{Jiahua Chen}
 \fi
 \date{\today}
 
 % Fix titling
 \let\settitle\title
 \renewcommand{\title}[1]{%
-	\settitle{#1}%
-	\newcommand{\headertitle}{#1}%
+    \settitle{#1}%
+    \newcommand{\headertitle}{#1}%
 }
 
 % Loads colors
 \RequirePackage[dvipsnames]{xcolor}
+\newcommand{\accentcolor}{\color{violet}}
 
 % Format
 \RequirePackage{geometry}
 \geometry{
-	left=20mm,
-	right=20mm,
-	top=20mm,
-	bottom=20mm,
-	headsep=5mm,
+    left=25mm,
+    right=25mm,
+    top=25mm,
+    bottom=25mm,
+    headsep=5mm,
 }
-\RequirePackage{parskip}
-
-% Section Styles
-\RequirePackage{sectsty}
-
-% Section Symbols
-\RequirePackage{titlesec}
-\titleformat{\section}{\sffamily\Large\bfseries}{\color{BlueViolet}\S\thesection}{1em}{}
-\titleformat{\subsection}{\sffamily\large\bfseries}{\color{BlueViolet}\S\thesubsection}{1em}{}
-\titleformat{\subsubsection}{\sffamily\bfseries}{\color{BlueViolet}\S\thesubsubsection}{1em}{}
-
-% Section Fonts
-\allsectionsfont{\sffamily}
-\ifcolorful
-	\allsectionsfont{\sffamily}
-	% Stuff to do if document is colorful document
-\fi
 
 % For header
-\RequirePackage{fancyhdr}
-\addtolength{\topmargin}{-4pt}
-\setlength{\headheight}{23pt}
-
-\fancypagestyle{plain}{%
-	\renewcommand{\headrulewidth}{0pt}% no rule above!
-	\fancyhf{}\fancyfoot[L]{\thepage}%
+\@ifundefined{KOMAClassName}
+{
+    \usepackage{fancyhdr}
+    \setlength{\headheight}{0.75in}
+    \setlength{\oddsidemargin}{0in}
+    \setlength{\evensidemargin}{0in}
+    \setlength{\voffset}{-1.0in}
+    \setlength{\headsep}{10pt}
+    \setlength{\textwidth}{6.5in}
+    \setlength{\headwidth}{6.5in}
+    \setlength{\textheight}{8.75in}
+    \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+    \setlength{\footskip}{0.3in}
 }
-
-\pagestyle{fancy}
-\fancyhf{}
-\lhead{\textbf{\theauthor} (\thedate)}
-\ifnodate
-	\lhead{\textbf{\theauthor}}
-\fi
-\rhead{\textbf{\headertitle}}
-\cfoot{\thepage}
+{
+    \usepackage[headsepline]{scrlayer-scrpage}
+    \renewcommand{\headfont}{}
+    \setlength{\footskip}{0.5in}
+    \setlength{\headsep}{10pt}
+    \ifnodate
+        \ihead{\textbf{\theauthor}}
+    \else
+        \ihead{\textbf{\theauthor} (\thedate)}
+    \fi
+    \automark{section}
+    \chead{}
+    \ohead{\footnotesize\textbf{\thetitle}}
+    \cfoot{\pagemark}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % For tables
@@ -145,20 +139,15 @@
 
 % For links
 \RequirePackage[
-	colorlinks = true,
-	linkcolor = blue,
-	urlcolor  = blue,
-	citecolor = blue,
-	anchorcolor = blue]{hyperref}
+    colorlinks = true,
+    linkcolor = blue,
+    urlcolor  = blue,
+    citecolor = blue,
+    anchorcolor = blue]{hyperref}
+\RequirePackage[nameinlink]{cleveref}
 
 % Underlining
 \RequirePackage{soul}
-
-% The usual
-\RequirePackage{amsmath}
-\RequirePackage{amsfonts}
-\RequirePackage{amssymb}
-\RequirePackage{amsthm}
 
 % Graphs
 \RequirePackage{tikz}
@@ -166,142 +155,204 @@
 % Better enumerations
 \RequirePackage{enumerate}
 
+% Mathy stuff
+\RequirePackage{mathrsfs}
+\RequirePackage{textcomp}
+\RequirePackage{multirow}
+\RequirePackage{mathtools}
+\RequirePackage{microtype}
+\RequirePackage{stmaryrd}
+
+% Listings (code)
+\RequirePackage{listings}
+\lstset{
+    basicstyle=\small\sffamily,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=tb,
+    columns=fullflexible,
+    showstringspaces=false
+}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Colorful Boxes
-\RequirePackage[most]{tcolorbox} % To make colorful boxes
-\tcbset{textmarker/.style={%
-			enhanced,
-			breakable,
-			parbox=false,boxrule=0mm,boxsep=0mm,arc=0mm,
-			outer arc=0mm,left=6mm,right=3mm,top=7pt,bottom=7pt,
-			toptitle=1mm,bottomtitle=1mm,oversize}}
-\RequirePackage{environ}
+\ifcolorful
+    \usepackage[framemethod=TikZ]{mdframed}
+    \mdfdefinestyle{mdbluebox}{%
+        roundcorner = 10pt,
+        linewidth=1pt,
+        skipabove=12pt,
+        innerbottommargin=9pt,
+        skipbelow=2pt,
+        linecolor=blue,
+        nobreak=false,% Page breaking
+        backgroundcolor=TealBlue!5,
+    }
+    \declaretheoremstyle[
+        headfont=\sffamily\bfseries\color{MidnightBlue},
+        mdframed={style=mdbluebox},
+        headpunct={\\[3pt]},
+        postheadspace={0pt}
+    ]{thmbluebox}
+    \mdfdefinestyle{mdredbox}{%
+        linewidth=0.5pt,
+        skipabove=12pt,
+        frametitleaboveskip=5pt,
+        frametitlebelowskip=0pt,
+        skipbelow=2pt,
+        frametitlefont=\bfseries,
+        innertopmargin=4pt,
+        innerbottommargin=8pt,
+        nobreak=false,%Page breaking
+        backgroundcolor=Salmon!5,
+        linecolor=RawSienna,
+    }
+    \declaretheoremstyle[
+        headfont=\bfseries\color{RawSienna},
+        mdframed={style=mdredbox},
+        headpunct={\\[3pt]},
+        postheadspace={0pt},
+    ]{thmredbox}
+    \mdfdefinestyle{mdgreenbox}{%
+        skipabove=8pt,
+        linewidth=2pt,
+        rightline=false,
+        leftline=true,
+        topline=false,
+        bottomline=false,
+        linecolor=ForestGreen,
+        backgroundcolor=ForestGreen!5,
+    }
+    \declaretheoremstyle[
+        headfont=\bfseries\sffamily\color{ForestGreen!70!black},
+        bodyfont=\normalfont,
+        spaceabove=2pt,
+        spacebelow=1pt,
+        mdframed={style=mdgreenbox},
+        headpunct={ --- },
+    ]{thmgreenbox}
+    \mdfdefinestyle{mdblackbox}{%
+        skipabove=8pt,
+        linewidth=3pt,
+        rightline=false,
+        leftline=true,
+        topline=false,
+        bottomline=false,
+        linecolor=black,
+        backgroundcolor=RedViolet!5!gray!5,
+    }
+    \declaretheoremstyle[
+        headfont=\bfseries,
+        bodyfont=\normalfont\small,
+        spaceabove=0pt,
+        spacebelow=0pt,
+        mdframed={style=mdblackbox}
+    ]{thmblackbox}
+    \newcommand{\listhack}{$\empty$\vspace{-2em}}
+\fi
 
-% All sorts of proposition/theorem Environment
-\ifrawnumbering
-	\newtheorem{thm}{Theorem}
-\fi
-\ifsectionnumbering
-	\newtheorem{thm}{Theorem}[section]
-\fi
-\ifsubsectionnumbering
-	\newtheorem{thm}{Theorem}[subsection]
-\fi
-\newtheorem*{thm*}{Theorem}
-\newtheorem{rawproposition}[thm]{Proposition}
-\newtheorem*{rawproposition*}{Proposition}
-\newtheorem{rawlemma}[thm]{Lemma}
-\newtheorem*{rawlemma*}{Lemma}
-\newtheorem{rawcorollary}[thm]{Corollary}
-\newtheorem*{rawcorollary*}{Corollary}
-\newtcolorbox{theoremBox}{textmarker,
-	borderline west={6pt}{0pt}{red},
-	colback=red!10!white}
-\NewEnviron{theorem}{
-	\begin{theoremBox}
-		\begin{thm}
-			\BODY
-		\end{thm}
-	\end{theoremBox}
-}
-\NewEnviron{theorem*}{
-	\begin{theoremBox}
-		\begin{thm*}
-			\BODY
-		\end{thm*}
-	\end{theoremBox}
-}
-\NewEnviron{proposition}{
-	\begin{theoremBox}
-		\begin{rawproposition}
-			\BODY
-		\end{rawproposition}
-	\end{theoremBox}
-}
-\NewEnviron{proposition*}{
-	\begin{theoremBox}
-		\begin{rawproposition*}
-			\BODY
-		\end{rawproposition*}
-	\end{theoremBox}
-}
-\NewEnviron{lemma}{
-	\begin{theoremBox}
-		\begin{rawlemma}
-			\BODY
-		\end{rawlemma}
-	\end{theoremBox}
-}
-\NewEnviron{lemma*}{
-	\begin{theoremBox}
-		\begin{rawlemma*}
-			\BODY
-		\end{rawlemma*}
-	\end{theoremBox}
-}
-\NewEnviron{corollary}{
-	\begin{theoremBox}
-		\begin{rawcorollary}
-			\BODY
-		\end{rawcorollary}
-	\end{theoremBox}
-}
-\NewEnviron{corollary*}{
-	\begin{theoremBox}
-		\begin{rawcorollary*}
-			\BODY
-		\end{rawcorollary*}
-	\end{theoremBox}
-}
-
-% Definition Environment
 \theoremstyle{definition}
-\newtheorem{rawdefinition}[thm]{Definition}
-\newtheorem*{rawdefinition*}{Definition}
-\newtcolorbox{definitionBox}{textmarker,
-	borderline west={6pt}{0pt}{cyan},
-	colback=cyan!10!white}
-\NewEnviron{definition}{
-	\begin{definitionBox}
-		\begin{rawdefinition}
-			\BODY
-		\end{rawdefinition}
-	\end{definitionBox}
-}
-\NewEnviron{definition*}{
-	\begin{definitionBox}
-		\begin{rawdefinition*}
-			\BODY
-		\end{rawdefinition*}
-	\end{definitionBox}
-}
-
-% Note Environment
-\theoremstyle{remark}
-\newtheorem{remark}[thm]{Remark}
-\newtheorem*{remark*}{Remark}
-
-% Example Environment
-\newtheorem{example}[thm]{Example}
-\newtheorem*{example*}{Example}
-
-% Example Environment
-\newtheorem{exercise}[thm]{Exercise}
-\newtheorem*{exercise*}{Exercise}
-
-% Problem Environments
-\ifpset
-	\NewEnviron{problem}[1]{
-		\textbf{Problem #1.}
-		\BODY
-		\ifgradescope
-			\newpage
-		\fi
-	}
+\ifcolorful
+    \ifsectionnumbering
+        \declaretheorem[%
+            style=thmbluebox,name=Theorem,numberwithin=section]{theorem}
+    \fi
+	\ifsubsectionnumbering
+		\declaretheorem[%
+			style=thmbluebox,name=Theorem,numberwithin=subsection]{theorem}
+	\fi
+	\ifrawnumbering
+		\declaretheorem[%
+			style=thmbluebox,name=Theorem]{theorem}
+    \fi
+    \declaretheorem[style=thmbluebox,name=Lemma,sibling=theorem]{lemma}
+    \declaretheorem[style=thmbluebox,name=Proposition,sibling=theorem]{proposition}
+    \declaretheorem[style=thmbluebox,name=Corollary,sibling=theorem]{corollary}
+    \declaretheorem[style=thmbluebox,name=Theorem,numbered=no]{theorem*}
+    \declaretheorem[style=thmbluebox,name=Lemma,numbered=no]{lemma*}
+    \declaretheorem[style=thmbluebox,name=Proposition,numbered=no]{proposition*}
+    \declaretheorem[style=thmbluebox,name=Corollary,numbered=no]{corollary*}
 \else
-	\theoremstyle{definition}
-	\newtheorem{problem}[thm]{Problem}
+    \ifsectionnumbering
+        \declaretheorem[name=Theorem,numberwithin=section]{theorem}
+    \else
+        \declaretheorem[name=Theorem]{theorem}
+    \fi
+    \declaretheorem[name=Lemma,sibling=theorem]{lemma}
+    \declaretheorem[name=Proposition,sibling=theorem]{proposition}
+    \declaretheorem[name=Corollary,sibling=theorem]{corollary}
+    \declaretheorem[name=Theorem,numbered=no]{theorem*}
+    \declaretheorem[name=Lemma,numbered=no]{lemma*}
+    \declaretheorem[name=Proposition,numbered=no]{proposition*}
+    \declaretheorem[name=Corollary,numbered=no]{corollary*}
+\fi
+\ifcolorful
+    \declaretheorem[style=thmgreenbox,name=Algorithm,sibling=theorem]{algorithm}
+    \declaretheorem[style=thmgreenbox,name=Algorithm,numbered=no]{algorithm*}
+    \declaretheorem[style=thmgreenbox,name=Claim,sibling=theorem]{claim}
+    \declaretheorem[style=thmgreenbox,name=Claim,numbered=no]{claim*}
+\else
+    \declaretheorem[name=Algorithm,sibling=theorem]{algorithm}
+    \declaretheorem[name=Algorithm,numbered=no]{algorithm*}
+    \declaretheorem[name=Claim,sibling=theorem]{claim}
+    \declaretheorem[name=Claim,numbered=no]{claim*}
+\fi
+\ifcolorful
+    \declaretheorem[style=thmredbox,name=Example,sibling=theorem]{example}
+    \declaretheorem[style=thmredbox,name=Example,numbered=no]{example*}
+\else
+    \declaretheorem[name=Example,sibling=theorem]{example}
+    \declaretheorem[name=Example,numbered=no]{example*}
+\fi
+% Remark-style theorems
+\ifcolorful
+    \declaretheorem[style=thmblackbox,name=Remark,sibling=theorem]{remark}
+    \declaretheorem[style=thmblackbox,name=Remark,numbered=no]{remark*}
+\else
+    \declaretheorem[name=Remark,sibling=theorem]{remark}
+    \declaretheorem[name=Remark,numbered=no]{remark*}
+\fi
+\declaretheorem[name=Conjecture,sibling=theorem]{conjecture}
+\declaretheorem[name=Conjecture,numbered=no]{conjecture*}
+\declaretheorem[name=Definition,sibling=theorem]{definition}
+\declaretheorem[name=Definition,numbered=no]{definition*}
+\declaretheorem[name=Exercise,sibling=theorem]{exercise}
+\declaretheorem[name=Exercise,numbered=no]{exercise*}
+\declaretheorem[name=Fact,sibling=theorem]{fact}
+\declaretheorem[name=Fact,numbered=no]{fact*}
+\declaretheorem[name=Problem,sibling=theorem]{problem}
+\declaretheorem[name=Problem,numbered=no]{problem*}
+\declaretheorem[name=Question,sibling=theorem]{ques}
+\declaretheorem[name=Question,numbered=no]{ques*}
+\Crefname{claim}{Claim}{Claims}
+\Crefname{conjecture}{Conjecture}{Conjectures}
+\Crefname{exercise}{Exercise}{Exercises}
+\Crefname{fact}{Fact}{Facts}
+\Crefname{problem}{Problem}{Problems}
+\Crefname{ques}{Question}{Questions}
+
+% Fancy section and chapter heads
+\ifcolorful
+    \@ifundefined{KOMAClassName}{}{
+        \@ifundefined{chapter}{}{
+            \addtokomafont{partprefix}{\rmfamily}
+            \renewcommand*{\partformat}{\accentcolor
+                \scalebox{2.5}{\thepart}\enlargethispage{2em}}
+            \addtokomafont{chapterprefix}{\raggedleft}
+            \RedeclareSectionCommand[beforeskip=0.5em]{chapter}
+            \renewcommand*{\chapterformat}{\mbox{%
+                    \scalebox{1.5}{\chapappifchapterprefix{\nobreakspace}}%
+                    \scalebox{2.718}{\accentcolor\thechapter}\enskip}}
+        }
+        \renewcommand*{\sectionformat}%
+        {\accentcolor\S\thesection\enskip}
+        \renewcommand*{\subsectionformat}%
+        {\accentcolor\S\thesubsection\enskip}
+        \renewcommand*{\subsubsectionformat}%
+        {\accentcolor\S\thesubsubsection\enskip}
+        \KOMAoptions{numbers=noenddot}
+    }
 \fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\newcommand{\recall}{\textit{Recall:} }
