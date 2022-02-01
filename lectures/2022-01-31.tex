@@ -1,0 +1,153 @@
+%!TEX root = ../notes.tex
+\section{January 31, 2022}
+\subsection{Linear Combinations \emph{continued}}
+Recall from last time that we proposed that
+\[\text{greatest common divisor} \leq \text{least linear combination}.\]
+\begin{example}
+    $\gcd(2024, 748)=44$ because we have
+    \begin{align*}
+        2024 & = 748\cdot 2 + 528                                  \\
+        748  & = 528\cdot 1 + 220                                  \\
+        528  & = 220\cdot 2 + 88                                   \\
+        220  & = 88\cdot 2 + \boxed{44} \leftarrow \gcd(2024, 748) \\
+        88   & = 44\cdot 2 + 0
+    \end{align*}
+    We determine which linear combinations or $2024$ znd $748$ we can create:
+    \begin{align*}
+        2024 & = 1\cdot 2024 + 0\cdot 748                         \\
+        748  & = 0\cdot 2024 + 1\cdot 748                         \\
+        528  & = 1\cdot 2024 + (-2)\cdot 748                      \\
+        220  & = 748 - 1\cdot 528                                 \\
+             & = 748 - 1\cdot (1\cdot 2024 + (-2)\cdot 748)       \\
+             & = -1\cdot 2024 + 3\cdot 748                        \\
+        88   & = 528 - 2\cdot 220                                 \\
+             & = \underbrace{[1\cdot 2024 + (-2)\cdot 748]}_{528}
+        - 2\cdot \underbrace{[-1\cdot 2024 + 3\cdot 748]}_{220}   \\
+             & = 3\cdot 2024 - 8\cdot 748                         \\
+        44   & = 220 - 2\cdot 88                                  \\
+             & = [-1\cdot 2024 + 3\cdot 748]
+        - 2\cdot [3\cdot 2024 - 8\cdot 748]                       \\
+             & = -7\cdot 2024 + 19\cdot 748
+    \end{align*}
+\end{example}
+Following this example, we have shown that every common divisor of $a$ and $b$ can be written as a linear combination of $a$ and $b$, and since the greatest common divisor has to be less than the least linear combination (as shown last time), the greatest common divisor \emph{is} the least linear combination\footnote{Assume for contradiction that the gcd were any less, then that would also be a linear combination. $\lightning$}.
+
+We realize that there is a \emph{recurrence} happening here. If we call every set of coefficients $x, y$ and $z, w$ for $a$ and $b$ respectively, such that
+\begin{align*}
+    a & = x\cdot a_0 + y\cdot b_0 \\
+    b & = z\cdot a_0 + y\cdot b_0
+\end{align*}
+where $a_0$ and $b_0$ are the original numbers, we can use a sliding window approach\footnote{Updating our iterators on every loop by sliding our window of coefficients down.} again to determine the next set of $x, y, z, w, a, b$.
+
+Recall from last time we had
+\begin{align*}
+    a' & = b       \\
+    b' & = a\mod b
+\end{align*}
+We can extend this algorithm for our new coefficients:
+\begin{align*}
+    x' & = z                                               \\
+    y' & = w                                               \\
+    z' & = w - \left\lfloor\frac{a}{b}\right\rfloor\cdot z \\
+    w' & = y - \left\lfloor\frac{a}{b}\right\rfloor\cdot w \\
+\end{align*}
+where $\left\lfloor\frac{a}{b}\right\rfloor$ are the quotients from our Euclidean Algorithm. Note that initially, we have
+\begin{align*}
+    a & = 1\cdot a_0 + 0\cdot b_0 \\
+    b & = 0\cdot a_0 + 1\cdot b_0
+\end{align*}
+so we have initial values of $x=1, y=0, z=0, w=0$.
+
+so our code for the \emph{extended Euclidean's Algorithm} is now
+\begin{lstlisting}[language=Python]
+def ext_gcd(a, b):
+    x, y, z, w = 1, 0, 0, 1
+    while b != 0:
+        x, y, z, w = z, w, w - (a // b) * z, y - (a // b) * w
+        a, b = b, a % b
+    return (x, y)
+\end{lstlisting}
+
+\subsection{Modular Arithmetic}
+% *** Create recall environment
+\recall We used a substitution/shift cipher to encrypt text:
+\[\begin{array}{ccc}
+        \mathtt{Y} & \mathtt{E} & \mathtt{S} \\
+        \downarrow & \downarrow & \downarrow \\
+        \mathtt{D} & \mathtt{J} & \mathtt{X}
+    \end{array}\]
+by incrementing 5 letters for each lecture.
+
+$a = 0$, $b = 1$, \dots, $z=25$.
+
+We had this notion of
+\begin{align*}
+    \text{ciphertext} & = \text{plaintext} + 5 \\
+    \mathtt{d}        & = \mathtt{y} + 5       \\
+    3                 & = 24+5 = 29
+\end{align*}
+
+\begin{definition}
+    We say $a\equiv b\mod{m}$ if $m\mid a - b$.
+
+    We say ``$a$ is congruent\footnote{Congruence is a ``behave like'' equality.} to $b$ modulo $m$''.
+\end{definition}
+\begin{example}
+    \begin{align*}
+        24 + 5 \equiv 3\mod{26} \\
+        22 + 2 \equiv 1\mod{12} \\
+    \end{align*}
+    The first example is from our shift sipher, the second example is equivalent to ``two hours after 11:00, it is 1:00''.
+\end{example}
+
+\begin{proposition}
+    If we have
+    \begin{align}
+        a_1          & \equiv a_2\mod{m} \nonumber                    \\
+        b_1          & \equiv b_2\mod{m} \nonumber                    \\
+        \intertext{Then we have the following: }
+        a_1 + b_1    & \equiv a_2 + b_2\mod{m} \label{premod-add}     \\
+        a_1 - b_1    & \equiv a_2 - b_2\mod{m} \label{premod-sub}     \\
+        a_1\cdot b_1 & \equiv a_2\cdot b_2\mod{m} \label{premod-mult}
+    \end{align}
+\end{proposition}
+\begin{proof}
+    For \cref{premod-add}, realize that we have
+    \[(a_1 + b_1) - (a_2 + b_2) = (a_1 - a_2) + (b_1 - b_2)\]
+    and the two terms on the right are each divisible by $m$ by our premise. We can also write out
+    \begin{align*}
+        a_1 + b_1 & = (a_2 + \alpha m) + (b_2 + \beta m)     \\
+                  & = (a_2 + b_2) + (\alpha + \beta)\cdot m.
+    \end{align*}
+    Similarly, for \cref{premod-sub}, we have
+    \begin{align*}
+        a_1 - b_1 & = a_2 + \alpha m - (b_2 + \beta m)      \\
+                  & = a_2 - b_2 + (\alpha - \beta) \cdot m.
+    \end{align*}
+    and for \cref{premod-mult}, we have
+    \begin{align*}
+        a_1\cdot b_1 & = (a_2 + \alpha m)\cdot (b_2 + \beta m)                           \\
+                     & = a_2\cdot b_2 + \alpha m b_2 + \beta m a_2 + \alpha\beta m^2     \\
+                     & = a_2\cdot b_2 + (\alpha b_2 + \beta a_2 + \alpha\beta m)\cdot m.
+    \end{align*}
+    which concludes the proofs of the premod rules.
+\end{proof}
+
+\begin{proposition}
+    There exists $b$ with
+    \[a\cdot b\equiv 1\mod{m}\]
+    if and only if $\gcd(a, m) = 1$.
+\end{proposition}
+\begin{proof}
+    We can write linear combination equation
+    \[a\cdot b + m\cdot k = 1\]
+    and we have that the following are equivalent (we cascade down the list and can easily prove the iff relations):
+    \begin{enumerate}[i.]
+        \item such a $b$ exists,
+        \item there is a solution $b, k$ to this equation,
+        \item $1$ is a linear combination of $a$ and $m$,
+        \item $1$ is the \emph{least} linear combination of $a$ and $m$,
+        \item $1 = \gcd(a, m)$.
+    \end{enumerate}
+    so we have that $1 = \gcd(a, m)$ if and only if $a$'s inverse $b$ exists.
+\end{proof}
