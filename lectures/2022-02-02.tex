@@ -1,0 +1,146 @@
+%!TEX root = ../notes.tex
+\section{February 2, 2022}
+\subsection{Inverses mod \texorpdfstring{$m$}{m}}
+\recall Last time, we showed in \cref{existence-of-inverse} that there exists an integer $b$ with with $a\cdot b\equiv 1\mod m$ iff $\gcd(a, m) = 1$.
+
+\begin{claim}
+    We further claim that if such a $b$ exists, then it is unique mod $m$.
+
+    That is, if we have
+    \begin{align*}
+        a\cdot b_1\equiv 1\pmod{m} \\
+        a\cdot b_2\equiv 1\pmod{m}
+    \end{align*}
+    then we have that $b_1\equiv b_2\pmod{m}$.
+\end{claim}
+\begin{proof}
+    We consider $b_1 ab_2$. We have
+    \[b_2\equiv (b_1 a)b_2 = b_2(a b_2) \equiv b_2\]
+    all taking mod $m$.
+\end{proof}
+
+How, then, could we compute this inverse $b$ efficiently?
+
+Recall that last class, we used the extended Euclidean algorithm to compute the linear combination of $a$ and $m$ efficiently,
+\begin{align*}
+    1 & = a\cdot u + m\cdot v          \\
+      & \equiv a\cdot \boxed{u}\mod{m}
+\end{align*}
+where $u$ is $b$.
+
+\subsection{Modular Arithmetic \emph{continued}}
+\begin{definition}[Ring of Integers mod $m$]
+    $\ZZ/m\ZZ = \{0, 1, 2, \dots, m-1\}$ with operations $+, -, \times \pmod{m}$.
+\end{definition}
+\begin{example}
+    $\ZZ/4\ZZ = \{0, 1, 2, 3\}$. We have the following operation tables for $\ZZ/4\ZZ$:
+    \[\begin{array}[]{c|cccc}
+            + & 0 & 1 & 2 & 3 \\ \hline
+            0 & 0 & 1 & 2 & 3 \\
+            1 & 1 & 2 & 3 & 0 \\
+            2 & 2 & 3 & 0 & 1 \\
+            3 & 3 & 0 & 1 & 2 \\
+        \end{array}\qquad
+        \begin{array}[]{c|cccc}
+            \times & 0 & 1 & 2 & 3 \\ \hline
+            0      & 0 & 0 & 0 & 0 \\
+            1      & 0 & 1 & 2 & 3 \\
+            2      & 0 & 2 & 0 & 2 \\
+            3      & 0 & 3 & 2 & 1 \\
+        \end{array}\]
+\end{example}
+
+\begin{definition}[Group of Units mod $m$]
+    We have the set of units in $\ZZ/m\ZZ$ as
+    \begin{align*}
+        (\ZZ/m\ZZ)^\times & = \{a\in \ZZ/m\ZZ\mid \exists b \text{s.t. }a\cdot b \equiv 1\} \\
+                          & = \{a\in \ZZ/m\ZZ\mid \gcd(a, m) = 1\}
+    \end{align*}
+\end{definition}
+\begin{example}
+    $(\ZZ/4\ZZ)^\times = \{1, 3\}$.
+\end{example}
+
+\begin{definition}[Euler Totient Function]
+    We have
+    \begin{equation*}
+        \varphi(m) = \# (\ZZ/m\ZZ)^\times
+    \end{equation*}
+    which counts the number of units modulo $m$.
+\end{definition}
+\begin{example}
+    $\varphi(4) = 2$.
+\end{example}
+
+Let's investigate the properties of units. Let's say $a_1, a_2$ are units. Which of the following have to be units?
+
+\begin{table}[h]
+    \centering
+    \renewcommand\arraystretch{1.7}
+    \begin{tabular}{c|l}
+                       & Does this have to be a unit?                                                \\ \hline
+        $a_1\cdot a_2$ & \begin{minipage}[t]{0.7\textwidth}
+                             \ul{Yes}! \vspace{0.5em}
+
+                             Since $\gcd(a_1, m) = 1$ and $\gcd(a_2, m) = 2$
+                             so we have $\gcd(a_1a_2, m) = 1$. We also have $a_1b_1\equiv 1\mod m$
+                             and $a_2b_2\equiv 1\mod m$,
+                             we have $(a_1a_2)(b_2b_1)\equiv 1\mod m$.
+                             \vspace{0.5em}
+                         \end{minipage} \\ \hline
+        $a_1 + a_2$    & \ul{No}. We have counterexample $m = 4$: $1 + 1$ is not a unit.             \\ \hline
+        $a_1 - a_2$    & \ul{Also no}. For any $a$, $a - a = 0$ which is never a unit.
+    \end{tabular}
+    \renewcommand\arraystretch{1.05}
+\end{table}
+
+\begin{definition}[Prime Number]
+    An integer $n\geq 2$ is \ul{prime} if its only (positive) divisors are $1$ and $n$.
+\end{definition}
+\begin{example}
+    Numbers like $2, 3, 5, 7, 11, 12, \dots$.
+\end{example}
+
+What if $m$ is a prime number? Then we have
+\[(\ZZ/m\ZZ)^\times = \{1, 2, \dots, m-1\}\]
+so we can divide by elements of $\ZZ/m\ZZ$, just like in $\QQ, \RR, \CC$. We can divide by any nonzero element of $\ZZ/m\ZZ$. We call these \ul{fields}!
+
+\subsection{Fast\emph{ish} Powering}
+\begin{problem*}
+    How might we compute $g^a\mod m$?
+\end{problem*}
+A na\"ive solution might be
+\begin{lstlisting}[language=Python]
+def pow_mod(g, a, m): 
+    return g ** a % m
+\end{lstlisting}
+What if we tried to compute \textsf{pow\_mod(239418762304, 12349876234, 12394876123482783641)} or something of the like? Something like this\dots
+
+\begin{center}
+    \includegraphics[height=5cm]{images/broken_laptop.png}
+\end{center}
+
+We could do something a bit more clever, like taking a mod every time we multiply:
+\begin{lstlisting}[language=Python]
+def pow_mod(g, a, m): 
+    p = 1
+    for i in range(a): 
+        p = (p * q) % m
+    return p
+\end{lstlisting}
+
+Yet we \emph{still} couldn't do \textsf{pow\_mod(239418762304, 12349876234, 12394876123482783641)} since that takes the amount of time proportional to \textsf{a}\footnote{Which can become big\dots}.
+
+\begin{example}
+    Let's try to compute $3^{37}$ by hand.
+    \begin{align*}
+         & 3^1                                   & \equiv & \ 3  \mod{100} \\
+         & 3^2                                   & \equiv & \ 9  \mod{100} \\
+         & 3^4 = (3^2)^2 =                       & \equiv & \ 81 \mod{100} \\
+         & 3^8 = (3^4)^2 = 81^2 = 6561           & \equiv & \ 61 \mod{100} \\
+         & 3^{16} = (3^8)^2 \equiv 61^2 = 3721   & \equiv & \ 21 \mod{100} \\
+         & 3^{32} = (3^{16})^2 \equiv 21^2 = 441 & \equiv & \ 41 \mod{100}
+    \end{align*}
+    Since $37 = 32 + 4 + 1$, we can simply do
+    \[3^{37} = 3^{32} \cdot 3^{4} \cdot 3^{1} = 41\cdot 81\cdot 3=1863\equiv 63 \mod{100}\]
+\end{example}
