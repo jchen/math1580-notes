@@ -1,0 +1,142 @@
+%!TEX root = ../notes.tex
+\section{February 4, 2022}
+\subsection{Fast Powering \emph{continued}}
+\begin{example}
+    \recall we wanted to compute $3^{37}\mod 100$
+    \begin{align*}
+        3^1    & \equiv 3\pmod{100} \\
+        3^2    & \equiv 9           \\
+        3^4    & \equiv 81          \\
+        3^8    & \equiv 61          \\
+        3^{16} & \equiv 21          \\
+        3^{32} & \equiv 41
+    \end{align*}
+    so we have
+    \[37=1+4+32 \qquad 3^{37} = 3^1\cdot 3^4\cdot 3^{32} \equiv 3\cdot 81\cdot 41\equiv 63\]
+\end{example}
+How might we do this as an algorithm? We want to keep track of a few things, such as $g$ (the current power), $p$ (the multiple we are building), $a$ (the remaining powers). This is akin to \emph{deconstructing the power in binary and composing our product}.
+
+\begin{lstlisting}[language=Python]
+def pow_mod(g, a, m):
+    p = 1
+    while a != 0:
+        if a % 2 == 1:
+            p = (p * g) % m
+        a = a // 2
+        g = g**2 % m
+    return p
+\end{lstlisting}
+
+\begin{example}
+    $37=100101_2$, so we peel off last digits and multiply $g$ into $p$.
+
+    Thinking about iterations, we have
+    \[\begin{array}{llll}
+            g  & p          & a  & a_2                \\ \hline
+            3  & 1          & 37 & 10010\underline{1} \\
+            9  & 3          & 18 & 10010\underline{0} \\
+            81 & 3          & 9  & 100\underline{1}   \\
+            61 & 43         & 4  & 10\underline{0}    \\
+            21 & 43         & 2  & 1\underline{0}     \\
+            41 & 43         & 1  & \underline{1}      \\
+               & \boxed{63} & 0  & \underline{0}
+        \end{array}\]
+\end{example}
+
+This algorithm takes approximately $\log_2(a)$ time to run, since it does as many steps for each digit in the binary representation of $a$.
+
+\subsection{Fun Integers}
+\recall An integer $p$ is \ul{prime} if $p\geq 2$ and
+\[a\mid p\Rightarrow a = \pm 1, \pm p\]
+
+\begin{proposition}
+    Let $p$ be prime. Then $p\mid ab\Rightarrow p\mid a$ or $p\mid b$.
+\end{proposition}
+\begin{example}
+    $p$ is not prime, this doesn't work. $p = 6$. $p\mid 4\cdot 9 = 36$
+    but $6\nmid 4$ and $6\nmid 9$.
+\end{example}
+
+\begin{proof}
+    Let $g = \gcd(p, a)$. $g$ is either $1$ or $p$.
+
+    If $g = p$, then we have that $p = g\mid a$.
+
+    If $p = 1$, we can write this as
+    \begin{align*}
+        1 = g & = p\cdot u + a\cdot v   \\
+        b     & = p\cdot ub + ab\cdot v
+    \end{align*}
+    since $p$ is a multiple of $p$ and $ab$ is a multiple of $p$, we have that $p\mid b$.
+\end{proof}
+
+\begin{theorem}[Fundamental Theorem of Arithmetic]
+    Any integer $a\geq 1$ can be factored into product of primes
+    \[a = p_1^{e_1}\cdots p_n^{e_n}\]
+    and this product of primes is \emph{unique} up to rearrangement.\footnote{This is to say, $\ZZ$ is a UFD! }
+\end{theorem}
+\begin{example}
+    Instead of thinking about integers, we think about $\ZZ[\sqrt{-5}]$, like
+    \[\ZZ[\sqrt{-5}] = \{a + b\sqrt{-5}\mid a, b\in \ZZ\}\]
+    Consider
+    \[6 = (1 + \sqrt{-5})(1-\sqrt{-5}) = 2\cdot 3\]
+    and each of $(1 + \sqrt{-5})$, $(1-\sqrt{-5})$, $2$, $3$ have no divisors besides themselves and $\pm 1$ (units).
+\end{example}
+\begin{proof}
+    We begin by working out an example: 
+    \begin{example}
+        Let's factor $60$, we can write this as \[60=6\cdot 10 = (2\cdot 3)\cdot (2\cdot 5) = 2^2\cdot 3\cdot 5.\]
+    \end{example}
+    What if we had different answers
+    \[p_1p_2\cdots p_t = a = q_1q_2\cdots q_s\]
+    We have that 
+    \begin{align*}
+        p_1\mid p_1\cdots p_t &= q_1\cdots q_s \\
+        &= q_1(q_2\cdots q_s)
+    \end{align*}
+    So we have that $p_1\mid q_1$ or $p_1\mid q_2\cdots q_s$, and we go on. So $p_1$ has to divide \emph{one} of $q_i$. But both are primes, so they are equal $p_1 = q_i$. We rearrange so $q_i$ is $q_1$. We strip off $p_1$ and $q_1$ and we have 
+    \[p_2\cdots p_t = q_2\cdots q_s\]
+    we continue until we have no factors left\footnote{We could also have taken a well-ordering approach to this statement, taking $a$ to be the least such non-uniquely factorizable number and showing that by peeling off $p_1$ and $q_1$, we get a smaller such $a$, which is a contradiction. }
+\end{proof}
+
+\begin{definition}
+    We define the \ul{order} 
+    \[\ord_p(a) = \text{the power of $p$ in the factorization of $a$}\]
+    such that we have 
+    \[a = \prod_p p^{\ord_p(a)}\]
+    \emph{(This makes sense since $\ord_p(a)$ is finite for finitely many $p$.)}
+\end{definition}
+
+\begin{theorem}[Fermat's Little Theorem]
+    Let $p$ be prime, $a\in \ZZ/p\ZZ$, 
+    \[a^{p-1}\equiv \begin{cases}
+        0 &\text{if $a\equiv 0$} \\
+        1 &\text{otherwise}
+    \end{cases}\]
+\end{theorem}
+In abstract algebra, this directly follows from Lagrange's Theorem for $\ZZ/p\ZZ$, we give another argument. 
+
+\begin{proof}
+    If $a\equiv 0$, this is sufficiently clear. 
+
+    Let $a\not\equiv 0$. We look at the numbers 
+    \[a, 2a, 3a, \dots, (p-1)a\]
+    We consider 2 questions: 
+    \begin{enumerate}[i.]
+        \item Are any of these divisible by $p$? 
+        
+        No! $p\nmid a$ and $p\nmid i$ so $p\nmid ia$ for $1\leq i < p$. 
+        \item Are any of these equal? i.e. $ia\equiv ja\mod p$. 
+        
+        No again! $a$ has an inverse mod $p$. 
+    \end{enumerate}
+    So we have that this list is a permutation of $\{1, 2, \dots, p-1\}$, that is, 
+    \[\{1, 2, \dots, p-1\} = \{a, 2a, \dots, (p-1)a\}\mod p\]
+    we multiply these sets together\footnote{This is truly a pro-gamer move}, 
+    \begin{align*}
+        1\cdot 2\cdot 3\cdots (p-1) &\equiv a\cdot 2a\cdots (p-1)a \mod p \\
+        &\equiv (1\cdot 2\cdots p-1)a^{p-1}
+        1\cdot 2\cdot 3\cdot (p-1)(a^{p-1}-1)\equiv 0\mod p  \\\implies a^{p-1}&\equiv 1\mod p. 
+    \end{align*}
+    Which is as desired. 
+\end{proof}
