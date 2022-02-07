@@ -99,7 +99,7 @@ This algorithm takes approximately $\log_2(a)$ time to run, since it does as man
     we continue until we have no factors left\footnote{We could also have taken a well-ordering approach to this statement, taking $a$ to be the least such non-uniquely factorizable number and showing that by peeling off $p_1$ and $q_1$, we get a smaller such $a$, which is a contradiction. }
 \end{proof}
 
-\begin{definition}
+\begin{definition}[Order]\label{defn:order-of-prime-factor}
     We define the \ul{order} 
     \[\ord_p(a) = \text{the power of $p$ in the factorization of $a$}\]
     such that we have 
@@ -107,7 +107,7 @@ This algorithm takes approximately $\log_2(a)$ time to run, since it does as man
     \emph{(This makes sense since $\ord_p(a)$ is finite for finitely many $p$.)}
 \end{definition}
 
-\begin{theorem}[Fermat's Little Theorem]
+\begin{theorem}[Fermat's Little Theorem]\label{theorem:flt}
     Let $p$ be prime, $a\in \ZZ/p\ZZ$, 
     \[a^{p-1}\equiv \begin{cases}
         0 &\text{if $a\equiv 0$} \\
