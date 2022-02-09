@@ -1,0 +1,118 @@
+%!TEX root = ../notes.tex
+\section{February 9, 2022}
+\subsection{Asymmetric/Public Key Cryptography}
+The premise is that we have \emph{Alice} and \emph{Bob} who are communicating, and \emph{Eve} intercepts \ul{all} communications between them. There is \textbf{no} communication between Alice and Bob ahead of time. A priori, it's not entirely obvious that this is possible\dots
+
+We'll see that this is indeed possible!
+
+\begin{example}
+    \ul{Analogy}: Alice and Bob are communicating by writing messages on pieces of paper.
+
+    Symmetric cryptography is having a shared safe, Alice and Bob both have the key/know the combination to, and both can leave messages and retrieve messages.
+
+    \begin{enumerate}
+        \item Alice sets up a box with a thin slot with a lock on it. Alice has the key to this lock.
+        \item Bob is able to deposit messages into the slot in the box, and Alice can retrieve it using her key.
+    \end{enumerate}
+\end{example}
+
+Our key is now $k = (k_\mathsf{priv}, k_\mathsf{pub})\in \mathcal{K} = \mathcal{K}_\mathsf{priv}\times \mathcal{K}_\mathsf{pub}$ which consists of a private key and public key.
+
+Our encryption and decryption functions are now
+\begin{align*}
+    e & : \mathcal{K}_\mathsf{pub} \times \mathcal{M} \to \mathcal{C}  \\
+    d & : \mathcal{K}_\mathsf{priv} \times \mathcal{C} \to \mathcal{M}
+\end{align*}
+\[d(k_\mathsf{priv}, e(k_\mathsf{pub}, m)) = m\]
+We want it to be easy to compute $e_{k_\mathsf{pub}}$ and $d_{k_\mathsf{priv}}$, but hard to compute $d_{k_\mathsf{priv}}$ only knowing $k_\mathsf{pub}$.
+
+Something easier to construct, before a full-fledged public key system, is a key exchange:
+\subsection{Diffie-Hellman Key Exchange}
+\textbf{Q: How can Alice and Bob agree on a secret key over an insecure channel?}
+
+\begin{example}
+    \ul{Analogy}: A lockbox that can only be used by one person...and both people have to participate to set it up.
+\end{example}
+
+Both parties have to agree on a key and have a line of communication before agreeing on a key. This can only be used if both parties are online at the same time.
+
+We start with a prime $p$ and $g\in(\ZZ/p\ZZ)^\times$ suitably. Alice and bob does the following, all mod $p$:
+\begin{center}
+    \begin{tabular}{ll}
+        \toprule
+        Alice              & Bob                 \\ \midrule
+        Generates $a$      & Generates $b$       \\
+        \quad $\downarrow$ & \quad $\downarrow$  \\
+        Computes $g^a$     & Computes $g^b$      \\
+        Send $g^a$ to Bob  & Send $g^b$ to Alice \\
+        Computes $(g^b)^a$ & Computes $(g^a)^b$  \\
+        \bottomrule
+    \end{tabular}
+\end{center}
+
+Alice and Bob now know $g^{ab}$, which is the secret key. Eve, however, only knows $g^a$ and $g^b$. Alice and Bob can now use this shared secret $g^{ab}$ as a key for symmetric cryptography.
+
+\begin{definition}[The Diffie-Hellman Problem (DHP)]
+    Given $g^a, g^b$, calculate $g^{ab}$.
+\end{definition}
+\begin{remark}
+    If we can solve the discrete log problem, we can solve the Diffie-Hellman problem.
+\end{remark}
+
+Vice versa? Can one solve DLP given solution to DHP? \emph{This is unknown\footnote{There is no known method.}.}
+
+\subsection{Elgamal Public Key Cryptography}
+We again start with $p$ prime and $g\in (\ZZ/p\ZZ)^\times$ suitably. This could be public knowledge, or Alice selects these.
+
+Alice: We have $a$ be Alice's private key, and $A = g^a$ be Alice's public key.
+
+Bob: Has message $m$ he wishes to send. Bob does the following:
+\begin{enumerate}
+    \item Generate random $k$ (used only once, to send this message).
+    \item Compute the following:
+          \begin{enumerate}
+              \item $c_1 = g^k\mod{p}$
+              \item $c_2 = m\cdot A^k \mod{p}$
+          \end{enumerate}
+    \item Send $c_1$ and $c_2$ to Alice.
+\end{enumerate}
+
+Alice:
+\[(c_1^a) = A^k \text{ so } c_2\cdot (c_1^a)^{-1}\equiv m\left((g^a)^k\right)\cdot \left((g^a)^k\right)^{-1} \equiv m\]
+Basically, they are using Diffie-Hellman key exchange, except $g^a$ is a public key and Bob assumes a secret key, and uses that to encrypt the message and sends it in one go.
+
+\subsubsection{Implementation}
+We use the following dependency \textsf{elgamal.py}: 
+\begin{lstlisting}[language=Python]
+def ext_gcd(a, b):
+    x, y, z, w = 1, 0, 0, 1
+    while b != 0:
+        x, y, z, w = z, w, w - (a // b) * z, y - (a // b) * w
+        a, b = b, a % b
+    return (x, y)
+
+def pow_mod(g, a, m):
+    p = 1
+    while a != 0:
+        if a % 2 == 1:
+            p = (p * g) % m
+        a = a // 2
+        g = g**2 % m
+    return p
+
+p = [some large prime]
+g = [some element mod p]
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+from elgamal import * 
+from random import randrange
+def e(A, m): 
+    k = randrange(p)
+    return (pow_mod(g, k, p), m * pow_mod(A, k, p))
+
+def d(a, c):
+    pow_mod(c[0])
+    ...
+\end{lstlisting}
+\emph{to be continued...}
