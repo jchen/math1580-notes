@@ -58,15 +58,17 @@ where $\left\lfloor\frac{a}{b}\right\rfloor$ are the quotients from our Euclidea
 \end{align*}
 so we have initial values of $x=1, y=0, z=0, w=0$.
 
-so our code for the \emph{extended Euclidean's Algorithm} is now
-\begin{lstlisting}[language=Python]
+so our code for the \emph{extended Euclidean Algorithm} is now
+\begin{algorithm}[Extended Euclidean Algorithm]
+    ~\begin{lstlisting}[numbers=none,language=Python]
 def ext_gcd(a, b):
     x, y, z, w = 1, 0, 0, 1
     while b != 0:
         x, y, z, w = z, w, w - (a // b) * z, y - (a // b) * w
         a, b = b, a % b
     return (x, y)
-\end{lstlisting}
+    \end{lstlisting}
+\end{algorithm}
 
 \subsection{Modular Arithmetic}
 % *** Create recall environment

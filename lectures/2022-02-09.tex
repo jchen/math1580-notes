@@ -82,30 +82,9 @@ Alice:
 Basically, they are using Diffie-Hellman key exchange, except $g^a$ is a public key and Bob assumes a secret key, and uses that to encrypt the message and sends it in one go.
 
 \subsubsection{Implementation}
-We use the following dependency \textsf{elgamal.py}: 
+We have the following algorithm for encryption and decryption in Elgamal: 
 \begin{lstlisting}[language=Python]
-def ext_gcd(a, b):
-    x, y, z, w = 1, 0, 0, 1
-    while b != 0:
-        x, y, z, w = z, w, w - (a // b) * z, y - (a // b) * w
-        a, b = b, a % b
-    return (x, y)
-
-def pow_mod(g, a, m):
-    p = 1
-    while a != 0:
-        if a % 2 == 1:
-            p = (p * g) % m
-        a = a // 2
-        g = g**2 % m
-    return p
-
-p = [some large prime]
-g = [some element mod p]
-\end{lstlisting}
-
-\begin{lstlisting}[language=Python]
-from elgamal import * 
+import ext_gcd, pow_mod
 from random import randrange
 def e(A, m): 
     k = randrange(p)
