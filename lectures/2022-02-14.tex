@@ -1,0 +1,103 @@
+%!TEX root = ../notes.tex
+\section{February 14, 2022}
+\subsection{Groups \emph{continued}}
+\begin{example}
+    Some itemize of groups and nongroups:
+    \begin{itemize}
+        \item $(\ZZ/N\ZZ, +)$: Yes (Abelian).
+        \item $(\ZZ/N\ZZ, \times)$: No. $0^{-1}$ does not exist (inverse).
+        \item $((\ZZ/n\ZZ)^\times, \times)$: Yes (Abelian).
+        \item $(\ZZ\setminus \{0\}, \times)$: No. $2^{-1}$ does not exist (inverse).
+        \item $(\ZZ\setminus \{0\}, +)$: No. No identity $e$.
+        \item $\left(\{n\times n\text{ matrices} : \det M \neq 0\}, \times\right)$: Yes (not Abelian for $n\geq 2$).
+    \end{itemize}
+\end{example}
+\begin{definition}
+    For $g\in G$, $x = 1, 2, 3, \dots$,
+    \[g^x = \underbrace{g\circ g\circ \cdots \circ g}_{x\text{ times}}\]
+    We extend this to define $g^0 = e$ and $g^{-n} = (g^n)^{-1}$ (so that our usual exponent rules also apply).
+\end{definition}
+\begin{example}
+    From just now, in $(\ZZ/N\ZZ, +)$, $1^3 = 3$.
+\end{example}
+\begin{definition}[Element Order]
+    The smallest (positive) $n$ with $g^n = e$ is called the \ul{order} of $g$.
+
+    If there is no such $n$, we say $g$ has \ul{infinite} order.
+\end{definition}
+\begin{proposition}
+    If $G$ is a finite group, then every element $g\in G$ has finite order.
+\end{proposition}
+\begin{proof}
+    Consider all powers of $g$
+    \[g, g^2, g^3, g^4, \dots\]
+    so at some point, we will have
+    \[g, g^2, g^3, g^4, \dots, g^i, \dots, g^j, \dots\]
+    where $g^i$ and $g^j$ are equal. Then $g^{j-i} = e$. Hence $G$ has a finite order.
+\end{proof}
+\begin{proposition}
+    Let $g\in G$ have order $k$, with $g^n = e$. Then $k\mid n$.
+\end{proposition}
+\begin{proof}
+    We use the division algorithm. We write
+    \[n = q\cdot k + r\text{ with }0\leq r < k\]
+    then we have
+    \[e = g^n = (g^k)^q g^r = e^q\cdot g^r\]
+    so $g^r = e$, which forces $r = 0$ since $0\leq r < k$. So $n = qk \Rightarrow k\mid n$.
+\end{proof}
+\begin{theorem}
+    $g^{\#G} = e$. In particular, $\ord g\mid \#G$.
+\end{theorem}
+\begin{proof}[Proof for Abelian groups]
+    Let $G = \{g_1, \dots, g_n\} = \{gg_1, gg_2, \dots, gg_n\}$. No two are equal, since we can take inverse of $g$. We multiply them all together:
+    \begin{align*}
+        g_1g_2\cdots g_n          & = (gg_1)\cdots (gg_n)        \\
+        \cancel{g_1g_2\cdots g_n} & = \cancel{g_1\cdots g_n} g^n \\
+        e                         & = g^n
+    \end{align*}
+    so we have as desired.
+\end{proof}
+This is true even if $G$ is not Abelian - it's Lagrange's Theorem, which we won't cover here\footnote{Covered in Math 1530, Abstract Algebra.}.
+
+Note that our previous cryptosystems: Diffie-Hellman key exchange and Elgamal, works in \emph{any} group.
+
+\textbf{Q: Why would we want to be able to pick our group?}
+
+Might we want to do this in a group that allows for fast operations? That makes encryption and decryption easy, but it also makes computing the discrete log difficult. We want groups that are \emph{easy enough} and \emph{hard enough}. We might appreciate this by the end of the course\dots
+
+\subsection{Computation Complexity}
+How might we quantify ``easy'' or ``hard'' in cryptography.
+\begin{example}
+    Let $g\in G$ a group. Let's consider exponentiation
+    \[x\longmapsto g^x\]
+    if $x$ has $k$ bits (i.e. $x\approx 2^k$). How many steps does it take us to compute $g^x$? At most $2k$ multiply and add steps.
+
+    What about solving the discrete log problem:
+    \[g^x\longmapsto x\]
+    where $x$ has $k$ bits. How many steps does this take (na\"ively, trying every power)? About $2^k$ steps.
+\end{example}
+\begin{definition}[Big-O]
+    We say $f(x) = \mathcal{O}(g(x))$ if there are \emph{constants} $c$ and $c'$ with
+    \[f(x) \leq c\cdot g(x) \quad \text{for all }x\geq c'\]
+\end{definition}
+\begin{example}
+    Say $f(x) = \mathcal{O}(1) \Leftrightarrow f$ is bounded.
+\end{example}
+
+If $f(x) = \mathcal{O}(x^c)$, then we say this is a ``easy'' problem.\footnote{We take $x$ to be the number of bits of the input}
+
+If $f(x) = \mathcal{O}(c^x)$, we think of this as a ``hard'' problem.
+
+\begin{proposition}
+    If
+    \[\lim_{x\to \infty}\frac{f(x)}{g(x)} < \infty\]
+    then $f(x) = \mathcal{O}(g(x))$.
+\end{proposition}
+\begin{proof}
+    Using definition of limits, for any $\varepsilon > 0$:
+    \[\left\vert\frac{f(x)}{g(x)} - L\right\vert < \varepsilon \text{ for }x\geq c\]
+    then $f(x) < (L + \varepsilon)\cdot g(x)$.
+\end{proof}
+\begin{example}
+    $2x^2+5x+7 = \mathcal{O}(x^2)$.
+\end{example}

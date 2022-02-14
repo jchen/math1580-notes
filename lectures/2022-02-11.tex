@@ -1,0 +1,77 @@
+%!TEX root = ../notes.tex
+\section{February 11, 2022}
+\subsection{Elgamal \emph{continued}}
+
+\recall we perform Elgamal by starting with a prime $p$ and $g\in (\ZZ/p\ZZ)^\times$ which is \emph{public knowledge}.
+
+Alice computes $a$ which is her \emph{private key}, and $A = g^{a}$ which is her \emph{public key}.
+
+\textbf{Encryption:} Bob generates a random $k$ and sends Alice
+\[c_0\equiv g^k\mod{p}\qquad c_1\equiv mA^k\mod{p}\]
+
+\textbf{Decryption:} Alice computes
+\[c_1\cdot (c_0^a)^{-1}\equiv m(g^a)^k \left((g^k)^a\right)^{-1}\]
+
+We continue as we did from last time:
+\begin{lstlisting}[language=Python]
+import ext_gcd, pow_mod
+from random import randrange
+def e(A, m): 
+    k = randrange(p)
+    return (pow_mod(g, k, p), m * pow_mod(A, k, p))
+
+def d(a, c):
+    return c[1] * ext_gcd(pow_mod(c[0], a, p), p)[0]
+\end{lstlisting}
+Which works as intended (try it out!).
+
+We note a property of Elgamal that there is an expansion factor of 2. It takes \emph{twice} as much space to store $c$ as $m$. We note that the expansion factor is always at least $1$ (otherwise, we wouldn't be able to invert it).
+
+\subsection{Midterm Details}
+\emph{Feb 16 @ 2pm in class}. If remote, send email.
+
+Topics will include: \emph{everything up to now} (literally right now).
+
+Focus: More theoretical, less computational. (Both are fair game!)
+
+Resources: Pen/pencil, paper. No notes and no book. Nothing else.
+
+Weighting: 20\% Midterm 1 and 30\% on Final. 30\% Midterm 2, 20\% Homework. Half on written and half on in-class exams.
+
+Problem set \#3 which is shorter than \#2. (Good practice!)
+
+Midterm results/curve will be announced hopefully by Friday after the midterm.
+
+\subsection{Introduction to Group Theory}
+Groups are an algebraic structure... they're sets endowed with an operation.
+\begin{example}
+    We have that $(\ZZ/p\ZZ, +)$ and $((\ZZ/p\ZZ)^\times, \cdot)$ are both groups.
+    \[\begin{array}{rcc}
+            \toprule
+                                & (\ZZ/p\ZZ, +)           & ((\ZZ/p\ZZ)^\times, \cdot )           \\ \midrule
+            \text{Identity:}    & 0+a=a                   & 1\cdot a = a                          \\
+            \text{Inverse:}     & a + (-a) = (-a) + a = 0 & a\cdot a^{-1} = a^{-1}\cdot a = 1     \\
+            \text{Associative:} & a + (b + c) = (a+b)+c   & a\cdot (b\cdot c) = (a\cdot b)\cdot c \\
+            \text{Commutative:} & a + b = b + a           & a\cdot b = b\cdot a                   \\ \bottomrule
+        \end{array}\]
+\end{example}
+\begin{definition}[Group]
+    A group $G$ is a set plus an operation
+    \[\circ : G\times G \to G\]
+    satisfying
+    \begin{enumerate}
+        \item \emph{Identity:} There is $e\in G$ with $e\circ a = a\circ e = a$.
+        \item \emph{Inverse:} For any $a\in G$, there is $a^{-1}\in G$ with
+              \[a\circ a^{-1} = a^{-1}\circ a = e\]
+        \item \emph{Associativity:} $a\circ (b\circ c)=(a\circ b)\circ c$
+    \end{enumerate}
+    We additionally say $G$ is \ul{Abelian} if we have
+    \[a\circ b = b\circ a\]
+\end{definition}
+
+\begin{definition}[Group Order]
+    The \ul{order} of $G$ written $\#G$ is the number of elements in group $G$. If the order is finite, we say $G$ is \ul{finite}.
+\end{definition}
+\begin{example}
+    $(\ZZ/p\ZZ, +)$ and $((\ZZ/p\ZZ)^\times, \cdot)$ are both Abelian and finite.
+\end{example}
