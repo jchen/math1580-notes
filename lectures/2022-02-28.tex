@@ -1,0 +1,88 @@
+%!TEX root = ../notes.tex
+\section{February 28, 2022}
+\subsection{Miller-Rabin Primality Test}
+Recall \cref{prop:aq-1-mod-p} from last class.
+\begin{proposition*}
+    Let $p$ be an odd prime. Write
+    \[p-1 = 2^k\cdot q\quad\text{with $q$-odd}\]
+    Then either
+    \[a^{q}\equiv 1\mod p\]
+    or one of $a^q, a^{2q}, a^{4q},\dots, a^{2^{k-1}q}$ is $\equiv -1\mod p$.
+\end{proposition*}
+
+For $561$, we write $561 = 2^4\cdot 35$.
+\begin{align*}
+    2^{35}  & \equiv 263 \pmod{561} \\
+    2^{70}  & \equiv 166 \pmod{561} \\
+    2^{140} & \equiv 67 \pmod{561}  \\
+    2^{280} & \equiv 1 \pmod{561}
+\end{align*}
+using the following code\dots
+\begin{lstlisting}[language=Python]
+from crypto import pow_mod
+
+pow_mod(2, 35) # 263
+263 ** 2 % 561 # 166
+166 ** 2 % 561 # 67
+67 ** 2 % 561 # 1
+\end{lstlisting}
+
+\begin{definition}[Miller-Rabin Witness]
+    $a$ is a \ul{Miller-Rabin witness} if $a$ does not satisfy above proposition.
+\end{definition}
+
+\begin{theorem}
+    If $n$ is composite, then at at least $75\%$ of $a\in(\ZZ/n\ZZ)$ are Miller-Rabin witnesses.
+\end{theorem}
+\begin{proof}
+    Given on faith.
+\end{proof}
+
+\begin{algorithm}[Miller-Rabin Probabilistic Primality Test]
+    ~\begin{lstlisting}[numbers=none,language=Python,escapeinside={(*}{*)}]
+from random import randrange
+from crypto import pow_mod
+
+def miller_rabin(n, a):
+    """
+    Miller-Rabin primality test on number n and base a
+    """
+    q, k = n - 1, 0
+    # Write (*$n-1 = 2^k\cdot q$*)
+    while q % 2 == 0:
+        k = k + 1
+        q = q // 2
+    a = pow_mod(a, q, n)
+    if a == 1 or a == n - 1:
+        return False
+    for _ in range(k - 1):
+        a = a ** 2 % n
+        if a == n - 1:
+            return False
+    return True
+
+def is_prime(n):
+    for _ in range(50):
+        if miller_rabin(n, randrange(1, n)):
+            return False
+    return True
+\end{lstlisting}
+\end{algorithm}
+
+Using this, we can find large prime numbers using
+\begin{lstlisting}[language=Python]
+from crypto import miller_rabin, is_prime
+def next_prime(n):
+    while not is_prime(n):
+        n = n + 1
+    return n
+\end{lstlisting}
+
+\begin{theorem}[Prime Number Theorem]
+    Probability that $n$ is prime is about
+    \[\frac{1}{\log(n)}\]
+    More formally,
+    \[\lim_{x\to \infty}\frac{\text{\# of primes $\leq x$}}{x/\log x} = 1\]
+\end{theorem}
+
+So the Miller-Rabin test lets us efficiently find (large) prime numbers.

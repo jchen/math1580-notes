@@ -1,0 +1,136 @@
+%!TEX root = ../notes.tex
+\section{February 23, 2022}
+\subsection{Chinese Remainder Theorem}
+\recall (HW2, Q2) asked us to find $x$ with
+\begin{align*}
+    x & \equiv 3\mod 7 \\
+    x & \equiv 4\mod 9
+\end{align*}
+We solved this by setting
+\begin{align*}
+    x = 7y + 3 & \equiv 4\mod 9         \\
+    7y         & \equiv 1\mod 9
+    \intertext{and taking $7^{-1}\pmod{9}$ which is $4$. So we have}
+    y          & \equiv 4\mod 9         \\
+    x = 7y+3   & \equiv 31\text{ works}
+\end{align*}
+\begin{theorem}[Chinese Remainder Theorem]
+    Let $\{m_i\}$ be a set of pairwise coprime numbers. That is, $\gcd(m_i, m_j) = 1$ for $i = j$. Then the system
+    \begin{align*}
+        x & \equiv a_1\mod m_1 \\
+        x & \equiv a_2\mod m_2 \\
+          & \vdots             \\
+        x & \equiv a_n\mod m_n
+    \end{align*}
+    has a solution.
+\end{theorem}
+\begin{proof}
+    By induction on $n$.
+    \begin{description}
+        \item[Base case.] $n = 1$, then we take $x = a_1$ which is a solution.
+        \item[Mini inductive step.] We first solve for $n=2$. We have
+            \begin{align*}
+                x & \equiv a_1\mod m_1 \\
+                x & \equiv a_2\mod m_2
+            \end{align*}
+            Let $u_1\cdot m_1 + u_2\cdot m_2 = 1$ (by Bezout's identity). Consider quantity
+            \begin{align*}
+                u_1m_1a_2 + u_2m_2a_1 & \equiv 0 + 1\cdot a_1 \equiv a_1 \mod m_1 \\
+                                      & \equiv 1\cdot a_2 + 0 \equiv a_2\mod m_2
+            \end{align*}
+            which solves for $n=2$.
+        \item[Full inductive step.] Let $n\geq 3$, we solve equation
+            \begin{align*}
+                x & \equiv a\mod m_1m_2\cdots m_{n-1} \\
+                x & \equiv a_{n}\mod m_{n}
+            \end{align*}
+            where the solution $a$ from the first equation comes from our inductive hypothesis. We can solve this by our mini inductive step (the $n=2$ case).
+    \end{description}
+    Which concludes this proof.
+\end{proof}
+
+\begin{example}
+    The Chinese Remainder Theorem allows us to solve congruences with composite moduli. For example, solve
+    \[x^2\equiv 18 \mod 21\]
+    This is equivalent to solving
+    \begin{align*}
+        x^2 & \equiv 18 = 0\mod 3 \\
+        x^2 & \equiv 18 = 4\mod 7
+    \end{align*}
+    since $21 = 3\cdot 7$. So this is equivalent to solving
+    \begin{align*}
+        x & \equiv 0\mod 3     \\
+        x & \equiv \pm 2\mod 7
+    \end{align*}
+    Using CRT, we have
+    \[1\cdot 7 + (-2)\cdot 3 = 1\]
+    so
+    \[x = 0\cdot 1\cdot 7 + (-2)\cdot 2\cdot 2 = -12 \equiv 9\mod 21\]
+    we do check that $9^2 = 81\equiv 18\mod 21$.
+\end{example}
+
+In general, we claim that square roots mod $p$ are easy to compute.
+\begin{proposition}
+    Let $p\equiv 3\mod 4$ and $a$ is a square in $\ZZ/p\ZZ$ (that is, $x^2\equiv a$ has a solution).
+
+    Then
+    \[x\equiv a^{\frac{p+1}{4}}\]
+    is a solution.
+\end{proposition}
+\begin{proof}
+    Say $a\equiv b^2\mod p$. Then
+    \[(a^{\frac{p+1}{4}})^2 = a^{\frac{p+1}{2}}\equiv (b^2)^{\frac{p+1}{2}}\equiv b^{p+1} \equiv b^{p-1}\cdot b^2\equiv 1\cdot b^2 = b^2 \equiv a\mod p\]
+    which concludes the proof.
+\end{proof}
+So we can compute square roots modulo a composite number $N$ by taking the prime factor decomposition of $N$, and taking the square root mod each factor, then using CRT.
+
+Conversely, any efficient algorithm to find square roots mod $N$ can be used to factor $N$.
+
+\emph{Why?}
+\begin{enumerate}[1.]
+    \item We generate an element $x$ mod $N$.
+    \item Ask for square root of $x^2$.
+    \item Good chance that we get $y\not\equiv \pm x$.
+          We now have
+          \begin{align*}
+              x^2        & \equiv y^2\mod N \\
+              (x+y)(x-y) & \equiv 0\mod N
+          \end{align*}
+    \item We can now calculate $\gcd(x+y, N)$ and find some factors of $N$.
+\end{enumerate}
+
+\subsection{Euler's Theorem}
+\recall Fermat's Little Theorem which says that
+\begin{align*}
+    a^{p-1} & \equiv 1\mod p\quad \text{ for }p\nmid a
+    \intertext{What happens when we replace $p$ with $N$ where $N$ is composite?}
+    a^{N-1} & \overset{?}{\equiv}1\mod N\quad \text{ for }\gcd(N,a)=1
+\end{align*}
+No! Recall demo showing counterexample.
+
+\begin{proposition}
+    If $N = pq$ for primes $p$ and $q$, then
+    \[a^{(p-1)(q-1)}\equiv 1\mod N\quad\text{ for }\gcd(N, a) = 1\]
+\end{proposition}
+\begin{proof}
+    \textsc{wlog} taking mod $p$, we have
+    \[a^{(p-1)(q-1)}\equiv (a^{p-1})^{q-1}\equiv 1^{q-1}\equiv 1\mod p\]
+    Similarly mod $q$ by symmetry. Then it is congruent to $1\mod pq$.
+\end{proof}
+
+We can generalize this...
+\begin{proposition}[Euler's Theorem]
+    For any composite $N$, we have
+    \[a^{\varphi(N)}\equiv 1\mod N\quad\text{ for }\gcd(N, a) = 1\]
+\end{proposition}
+
+\subsection{Exponentiation}
+Given an exponent $x$, we can compute $e^x$ fast. Inverting this gives us the \emph{Discrete Log Problem}. Diffie-Hellman Key Exchange and Elgamal rely on this.
+
+What if we think of this as a function of the base? Given a base $x$, we want to take it to exponent $e$ to get $x^e$. Inverting this is the \emph{Extracting Roots} problem. This is the basis of the RSA cryptosystem (see next time!).
+
+\begin{claim*}
+    Let $\gcd(e, p-1) = 1$. We can construct $de\equiv 1 \mod p-1$. Then $(x^e)^d\equiv x$.
+\end{claim*}
+
+So \emph{extracting roots} is easy mod prime $p$, but hard mod composites. We'll see this next time. 

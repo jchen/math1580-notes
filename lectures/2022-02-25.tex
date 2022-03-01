@@ -1,0 +1,100 @@
+%!TEX root = ../notes.tex
+\section{February 25, 2022}
+\recall Midterm discrete log problem where
+\[x\to x^e\mod p\]
+and a solution we gave was take $(x^e)^p\equiv x$ where $de\equiv 1\mod (p-1)$.
+
+What if we didn't take this mod $p$, but instead took it mod $pq$.
+
+We can take the analog of Fermat's Little Theorem mod $pq$, where
+\[a^{(p-1)(q-1)}\equiv 1\mod pq\]
+
+What if we did the same thing, instead of taking inverse mod $p-1$, we took it mod $(p-1)(q-1)$ to extract $e^\mathrm{th}$ roots if we know $(p-1)(q-1)$.
+
+We know $p$ and $q$, we can easily figure out $(p-1)(q-1)$. Also, if we know $(p-1)(q-1)$, we also know
+\[pq-p-q+1\]
+We know that $pq = x$ and $p+q = y$, then $pq$ are roots of $t^2-yt+x=0$.
+
+\subsection{RSA Public-Key Cryptography}
+Alice generates
+\begin{align*}
+    p, q                  & \to \text{Two large prime numbers} \\
+    e                     & \to \text{``Public exponent''}     \\
+    N = pq                & \to \text{``Public modulo''}       \\
+    \boxed{(e, N)}        & \to \text{Public key}              \\
+    (d, N)                & \to \text{Private key}             \\
+    \text{where }d\cdot e & \equiv 1\mod(p-1)(q-1)
+\end{align*}
+
+Bob has some message $m$ he wishes to send to Alice. Bob sends $m^e\mod N$ and sends it to Alice.
+
+After receiving this message, Alice can recover $(m^e)^d\equiv m\mod N$.
+
+$p, q$ are private, but $pq$ is private. The security of RSA rests on multiplication being easy, but factorization being hard ($pq$ is hard to factorize into $p$ and $q$).
+
+We might implement such an algorithm like so:
+\begin{lstlisting}[language=Python]
+from crypto import gcd, ext_gcd, pow_mod
+N = p * q
+d = ext_gcd(e, (p-1) * (q-1))[0] % ((p-1) * (q-1))
+m = 1234567891234786951234010239847123748
+# 0 < m < N is True
+c = pow_mod(m, e, N)
+pow_mod(c, d, N) # => m
+\end{lstlisting}
+
+If we were Alice and Bob, we \emph{still} have one step to go! We need to find ourselves big prime numbers $p, q$ (finding $e$ is easy, we can just use our \textsf{gcd} algorithm). How do we do that?
+
+\subsection{Primality Testing}
+\textsf{Prime hunting!}
+
+Prime numbers are reasonably common. So generating a large prime number amounts to generating a number, checking if it's prime, and repeating until we get a prime.
+
+This reduces to the problem of checking if a number is prime. Given an $n$, is it a prime?
+
+\begin{lstlisting}
+from crypto import pow_mod
+n = 123874610239487102893741890237023
+pow_mod(2, n-1, n)
+\end{lstlisting}
+gives us a basic primality check. Fermat's Little Theorem says that if $n$ is prime, then $2^{p-1}\equiv 1\mod n$.
+
+\begin{definition}[Witnesses]
+    We say that $a$ is a \ul{witness} for the compositeness of $n$ if
+    \[a^{n-1}\not\equiv 1\mod n\]
+    and $gcd(a, n) = 1$.
+\end{definition}
+
+We have a problem! Fermat's Little Theorem is not an if-and-only-if. We can have numbers that pass this test for almost every base. Take $n = 3\cdot 11\cdot 17 = 561$.
+
+\begin{lstlisting}[language=Python]
+from crypto import pow_mod, gcd
+for a in range(n):
+    if gcd(a, n) == 1:
+        print(pow_mod(a, n-1, n))
+\end{lstlisting}
+gives $1$ for \emph{everything}\footnote{oh no!}
+
+\begin{definition}[Carmichael Number]
+    A \ul{Carmichael number} is a composite number with \emph{no} witness of compositeness.
+\end{definition}
+\begin{example}
+    $561$ is a Carmichael Number.
+\end{example}
+
+We now \emph{almost} have a way of checking for primality, but it doesn't always quite work.
+
+Since taking to the power of $n-1$ is a group homomorphism, then Lagrange's Theorem states that if there is a witness, then there are \emph{a lot} of witnesses.
+
+\begin{proposition}\label{prop:aq-1-mod-p}
+    Let $p$ be an odd prime. Write
+    \[p-1 = 2^k\cdot q\quad\text{with $q$-odd}\]
+    Then either
+    \[a^{q}\equiv 1\mod p\]
+    or one of $a^q, a^{2q}, a^{4q},\dots, a^{2^{k-1}q}$ is $\equiv -1\mod p$.
+\end{proposition}
+\begin{proof}
+    We look at this sequence
+    \[a^q, a^{2q}, a^{4q},\dots, \underbrace{a^{2^iq}}_{\not\equiv 1\pmod p}, \underbrace{a^{2^{i+1}q}}_{\equiv 1\pmod p}, \dots, a^{2^{k-1}q}, a^{2^kq}\]
+    We have that $a^{2^kq}\equiv 1\mod p$ by Fermat's Little Theorem. There's some point where we `become' congruent to $1\mod p$. If the first one is one, then we have the first case. Otherwise we have $a^q\not\equiv 1$ mod $p$, then we repeatedly square until we get to $1\mod p$. Then \emph{right before} we turned to $1\mod p$, we would have had $-1\mod p$. In our example above, this is $a^{2^iq}$. 
+\end{proof}
