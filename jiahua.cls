@@ -171,7 +171,10 @@
     numberstyle=\tiny,
     frame=tb,
     columns=fullflexible,
-    showstringspaces=false
+    keywordstyle     = \bfseries\color{blue},
+    stringstyle      = \color{magenta},
+    commentstyle     = \color{ForestGreen},
+    showstringspaces = false,
 }
 
 \RequirePackage{fontawesome}

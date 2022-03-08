@@ -1,0 +1,83 @@
+%!TEX root = ../notes.tex
+\section{March 7, 2022}
+\subsection{Pollard's \texorpdfstring{$p-1$}{p-1} Method}
+\recall the Pollard's $p-1$ method from last time. Let
+\[N = p\cdot q\]
+\[\begin{array}{c}
+        p-1\mid n! \\
+        q-1\nmid n!
+    \end{array}\rightarrow \gcd(N, a^{n!}-1) = p\]
+
+\begin{lstlisting}[language=Python]
+from pollard import * 
+
+def factor(N):
+    # Naive, brute force factoring algorithm.
+    i = 2
+    while N % i != 0:
+        i += 1
+    return i
+
+def factor(N, a=2):
+    # Pollard's method
+    i = 1
+    while gcd(a - 1, N) == 1:
+        i += 1
+        a = pow_mod(a, i, N)
+    return gcd(a - 1, N)
+\end{lstlisting}
+
+This algorithm is \emph{significantly} faster than random guesses. By how much? We can formalize this intuition of size of prime factors:
+\begin{definition}
+    We say $n$ is \ul{$B$-smooth} if all prime factors are $\leq B$. We define
+    \[\Psi(X, B) = \text{\# of $B$-smooth $n\leq X$}.\]
+\end{definition}
+\begin{theorem}
+    Let $X, B$ increase together. Suppose \[(\log X)^\varepsilon \leq \log B \leq (\log X)^{1-\varepsilon}\]
+    Then
+    \[\frac{\Psi(X, B)}{X} = u^{-u\cdot (1+o(1))}\quad\text{where }u = \frac{\log X}{\log B}.\]
+\end{theorem}
+\ul{What is $o(1)$?}
+\begin{definition}
+    Say $f(x) = o(g(x))$ if
+    \[\lim_{x\to\infty}\frac{f(x)}{g(x)} = 0\]
+\end{definition}
+So ``$o(1)$'' is to mean something whose limit is $0$. This is in contrast to $O(1)$ which means something whose limit is finite.
+
+For our purposes, we say that the probability $X$ is $B$-smooth is $\approx u^{-u}$ where $u = \frac{\log X}{\log B}$.
+
+What if we do Pollard $p-1$ for $e^{\sqrt{\log p}}$ steps? The probability of success is then \[\sqrt{\log p}^{-\sqrt{\log p}}\approx e^{-\frac{1}{2}\log\log p\cdot \sqrt{\log p}} \gg p^{-\varepsilon}\]
+
+By brute force, doing $p^\varepsilon$ steps gives a probability of success $\approx p^{\varepsilon - 1}$.
+
+\subsection{Quadratic Sieve}
+\textbf{Goal:} find $a, b$ with $a^2\equiv b^2\pmod{N = pq}$, hence $(a-b)(a+b)\equiv 0\mod N$. $\gcd(a+b, N)$ will allow us to recover $p$ or $q$ with decent probability.
+
+\begin{example}
+    For example, if
+    \begin{align*}
+        (\lfloor\sqrt{N}\rfloor + 1)^2 & \equiv (\lfloor\sqrt{N}\rfloor + 1)^2 - N
+        = 2^1\cdot 3^1                                                             \\
+        (\lfloor\sqrt{N}\rfloor + 2)^2 & \equiv (\lfloor\sqrt{N}\rfloor + 2)^2 - N
+        = (\text{not smooth})                                                      \\
+        (\lfloor\sqrt{N}\rfloor + 3)^2 & \equiv (\lfloor\sqrt{N}\rfloor + 3)^2 - N
+        = 2^2\cdot 3^1                                                             \\
+        (\lfloor\sqrt{N}\rfloor + 4)^2 & \equiv (\lfloor\sqrt{N}\rfloor + 4)^2 - N
+        = 2^1\cdot 3^2                                                             \\
+                                       & \vdots
+    \end{align*}
+    then we have
+    \[\left[(\lfloor\sqrt{N}\rfloor + 1)^3\right]^2 \equiv \left[(\lfloor\sqrt{N}\rfloor + 3) (\lfloor\sqrt{N}\rfloor + 4)\right]^2\]
+    Which comes from the fact that the exponent vectors
+    \[\begin{bmatrix}1\\1\end{bmatrix}, \begin{bmatrix}2\\1\end{bmatrix}, \begin{bmatrix}1\\2\end{bmatrix}\]
+    are linearly dependent. We can take these mod $2$ (the parity) since we square. We can also rewrite this as\footnote{Using the definition of linear dependence}
+    \[\left[(\lfloor\sqrt{N}\rfloor + 1)(\lfloor\sqrt{N}\rfloor + 3) (\lfloor\sqrt{N}\rfloor + 4)\right]^2\equiv \left(2^2\cdot 3^2\right)^2\]
+\end{example}
+So we can do the following steps:
+\begin{enumerate}
+    \item Pick smoothness bound $B$.
+    \item Find integers
+          \[(\lfloor \sqrt{N}\rfloor + i)^2 - N\]
+          that are $B$ smooth.
+    \item Find linear relationship between exponent vectors. Then we get a congruence $a^2\equiv b^2\pmod N$ after which we can try to find factors of $N$. 
+\end{enumerate}
