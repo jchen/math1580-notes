@@ -1,0 +1,64 @@
+%!TEX root = ../notes.tex
+\section{March 11, 2022}
+\subsection{Quadratic Sieve \emph{continued}}
+We resume our discussion of the example of \cref{example:quadratic-sieve}. We want to find an optimal $B$ for the algorithm, and we do this by analyzing runtimes.
+
+The runtime of $X$ is first approximately $B\cdot u^u$ where \[u = \frac{\log \sqrt{N}}{\log B}.\]
+
+And in addition, solving a $B\cdot B$ system of linear equations. It takes $B^2$ operations to zero out one column ($B$ rows and subtracting a column takes $B$ operations), then we do this for $B$ columns. So the runtime is $B^3$.
+
+We now have $u^u$ is decreasing in $B$ and $B^3$ is increasing in $B$. Minimizing the runtime, we set $B^3 \sim B\cdot u^u$, i.e. $B^2\sim u^u$. Using very sketchy mathematics,
+\begin{align*}
+    u^u                        & \sim B                             \\
+    u\log u                    & \sim B                             \\
+    \frac{log N}{\log B}\sim u & \sim B                             \\
+    \log B                     & \sim \sqrt{\log N}                 \\
+    B                          & \sim e^{\sqrt{\log N}}             \\
+    u                          & \sim \frac{\log{\sqrt{N}}}{\log B}
+    \sim \frac{\log N}{\log B} \sim \sqrt{\log N}
+\end{align*}
+is a \emph{loose} guess. But we can use this to make a more approximate guess.
+
+Being more rigorous, $u^u= B^2$ gives $u\log u = 2\log B$. Then using our estimate for $u$ from above, we have
+\begin{align*}
+    u\cdot \log\left[\sqrt{\log N}\right] & = 2\log B                                    \\
+    \frac{1}{2}\frac{\frac{1}{2}\log N}{\log B}\log\log N
+    = \frac{1}{2}u\log\log N              & = 2\log B                                    \\
+    (\log B)^2                            & = \frac{1}{8}\log N\log\log N                \\
+    \Rightarrow B                         & \sim e^{\sqrt{\frac{1}{8}\log N \log\log N}}
+\end{align*}
+where we note the difference of a factor of $\frac{1}{8}\log\log N$ isn't that far off from $e^{\sqrt{\log N}}$. So total runtime is around $B^3$ which is $e^{\sqrt{\frac{9}{8}\log N\log\log N}}$. \emph{It's not super fast but not totally stupid.}
+
+Realistically, the $B^3$ can be reduced to $B^2$ in solving our $B\times B$ system, but we can get rid of our factors of $2$'s from before. This lets us get rid of the factor of $\frac{9}{8}$ so our total runtime is like
+\[e^{\sqrt{\log N\log\log N}}\]
+There are even faster algorithms, namely the number field sieve. It replaces the square root from above into a cube root and has runtime
+\[e^{\sqrt[3]{c\cdot \log N(\log\log N)^2}}\]
+
+\subsection{Index Calculus \& Discrete Logs}
+The discrete log problem is solving $x$ given $g^x = a$ and we know $g$ and $a$. We can do a similar strategy to the quadratic sieve.
+We calculate
+\begin{align*}
+    g^1 \pmod p & = 2                   \\
+    g^2 \pmod p & = \text{(not smooth)} \\
+    g^3 \pmod p & = 2\cdot 3            \\
+\end{align*}
+where we pick some smoothness bound $B$. We then find $g^i\equiv \text{(B-smooth)}\mod p$. We find enough $B$ smooth things such that by linear algebra, we can solve $g^x = 2, 3, 5, 7, \dots$.
+
+We take
+\begin{align*}
+    a\mod p             & = \text{(not smooth)} \\
+    a\cdot g^{-1}\mod p & = \text{(not smooth)} \\
+    a\cdot g^{-2}\mod p & = 3
+\end{align*}
+which is smooth. So we find $a\cdot g^{-i}\equiv \text{(B-smooth)}\mod p$. Then by linear algebra we can solve for $a$ given lots of smooth $g^i$.
+
+\begin{ques*}What is the runtime of this? \end{ques*}
+
+We need to go up to $g^x$ where $x$ is about $B\cdot u^u$ ($u^u$ is the probability of being $B$-smooth). Linear algebra will take runtime $B^2$. Similar to just now, this is exactly the same problem as above except $\sqrt{N}$ is replaced with $P$. Before (in the quadratic sieve), we had
+\[B\sim \exp\left(\frac{1}{4}\log N\log\log N\right)\]
+and
+\[\text{Runtime}\sim \exp\left(\log N\log\log N\right)\]
+Replacing $\log{N}$ with $2\log P$, our bound becomes
+\[B\sim \exp\left(\frac{1}{2}\log p\log\log p\right)\]
+\[\text{Runtime}\sim \exp\left(2\log p\log\log p\right)\]
+What if $g\in$ subgroup of order $q$? Babystep-Giantstep changes from $\sqrt{p}$ to $\sqrt{q}$. With index calculus, there is no advantage of knowing that $g$ is im a smaller subgroup. We don't have a decrease in runtime. 

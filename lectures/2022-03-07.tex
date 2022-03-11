@@ -53,7 +53,7 @@ By brute force, doing $p^\varepsilon$ steps gives a probability of success $\app
 \subsection{Quadratic Sieve}
 \textbf{Goal:} find $a, b$ with $a^2\equiv b^2\pmod{N = pq}$, hence $(a-b)(a+b)\equiv 0\mod N$. $\gcd(a+b, N)$ will allow us to recover $p$ or $q$ with decent probability.
 
-\begin{example}
+\begin{example}\label{example:quadratic-sieve}
     For example, if
     \begin{align*}
         (\lfloor\sqrt{N}\rfloor + 1)^2 & \equiv (\lfloor\sqrt{N}\rfloor + 1)^2 - N
