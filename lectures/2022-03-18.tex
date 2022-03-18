@@ -1,0 +1,91 @@
+%!TEX root = ../notes.tex
+\section{March 18, 2022}
+\subsection{Elliptic Curves over Finite Fields \emph{continued}}
+\recall from last class, we had our toy example
+\begin{example*}
+    We take elliptic curve
+    \[y^2 = x^3 + x + 2\quad \text{ over }\ZZ/5\ZZ.\]
+    with group law
+    \[\begin{array}{c|cccc}
+            +     & \cO   & (1,2) & (4,0) & (1,3) \\ \hline
+            \cO   & \cO   & (1,2) & (4,0) & (1,3) \\
+            (1,2) & (1,2) & (4,0) & (1,3) & \cO   \\
+            (4,0) & (4,0) & (1,3) & \cO   & (1,2) \\
+            (1,3) & (1,3) & \cO   & (1,2) & (4,0)
+        \end{array}\]
+\end{example*}
+We define some more useful functions:
+\begin{lstlisting}
+def minus(P, p):
+    if P == O:
+        return O
+    else:
+        x, y = P
+        return (x, (-y) % p)
+\end{lstlisting}
+What about multiplication? We can repeatedly add:
+\begin{lstlisting}
+def multiply(P, n, a, p):
+    S = O
+    for _ in range(n):
+        S = add(P, S, a, p)
+    return S
+\end{lstlisting}
+but this might be very slow (it does $n$ iterations). We can do something similar to fast powering for exponentiation, except we repeatedly double our point:
+\begin{lstlisting}
+def multiply(P, n, a, p):
+    S = 0
+    while n != 0:
+        if n % 2 == 1:
+            S = add(S, P, a, p)
+        n = n // 2
+        P = add(P, P, a, p)
+    return S
+\end{lstlisting}
+
+\begin{ques*}
+    What is the order of $E(\FF_p)$? That is, how many points are there on the elliptic curve?
+\end{ques*}
+Let's say we take $x, y, \dots$. We want to solve
+\[y^2\overset{?}{=}x^3 + ax + b\]
+There are $p^2$ different $(x, y)$. The probability that this equality holds is \emph{like} $\frac{1}{p}$. So there are about $p^2\cdot \frac{1}{p} + 1\approx p + 1$ (added one for the point $\cO$) elements in $E(\FF_p)$.
+
+\begin{theorem}
+    \[|(p+1) - \#E(\FF_p)| \leq 2\sqrt{p}.\] That is, the difference between our estimate $p+1$ and the actual number of points in $E(\FF_p)$ is bounded by $2\sqrt{p}$.
+\end{theorem}
+\begin{proof}
+    \emph{(Beyond the scope of this class.)}
+\end{proof}
+
+\begin{remark}
+    ~\begin{enumerate}
+        \item We note that this number can be efficiently computed (in polynomial time in the digits of $p$). \emph{(Again, beyond the scope of this class.)}
+        \item We call this number $|(p+1) - \#E(\FF_p)|$ the \ul{trace of Frobenius}. \emph{(You guessed it: again, beyond the scope of this class.)}
+    \end{enumerate}
+\end{remark}
+
+Just for funsies, we can compute the \emph{trace of Frobenius}\footnote{Using \emph{Sage}.}:
+\begin{lstlisting}
+p = next_prime(92834712736591432)
+E = EllipticCurve([34123498, GF(p)(2349182347)])
+E.trace_of_frobenius()
+\end{lstlisting}
+
+\subsection{Elliptic Diffe-Hellman Key Exchange}
+\subsubsection{Elliptic Discrete Log Problem}
+This is based on the \emph{Elliptic Discrete Log Problem}:
+Given $E$ an elliptic curve over $\FF_p$ with $P$ a point on $E$. We take $P, n$ and calculate
+\[n\cdot P\]
+The \ul{elliptic curve discrete log problem} is given point $n\cdot P$, computing $n$.
+
+The best known algorithm for \emph{ECDLP} is Babystep-Giantstep, which runs in $\mathcal{O}(\sqrt{p})$ and $\mathcal{O}(\sqrt{p})$ memory. There is \emph{no} analog of index calculus. This could be good or bad... This could mean a lack of knowledge about elliptic curves. We could also create greater security at smaller key sizes.
+
+\subsubsection{Sharing Secrets}
+\emph{Public information:} we have some $p$ prime and $E$ an elliptic curve over $\FF_p$. We have $P$ a point in the elliptic curve $E$.
+
+Alice and Bob do the following:
+
+\begin{enumerate}
+    \item Alice and Bob each generate $a$ and $b$. Alice computes $a\cdot P$ and Bob computes $b\cdot P$. This is shared to each other (and public).
+    \item Alice now computes $a\cdot (b\cdot P)$ and Bob computes $b\cdot (a\cdot P)$. These are all equal to $(a\cdot b)\cdot P$ which is a shared secret.
+\end{enumerate}

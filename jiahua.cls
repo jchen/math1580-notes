@@ -171,10 +171,11 @@
     numberstyle=\tiny,
     frame=tb,
     columns=fullflexible,
-    keywordstyle     = \bfseries\color{blue},
+    keywordstyle     = \bfseries\color{RoyalPurple},
     stringstyle      = \color{magenta},
     commentstyle     = \color{ForestGreen},
     showstringspaces = false,
+    language = Python
 }
 
 \RequirePackage{fontawesome}
