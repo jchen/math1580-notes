@@ -1,0 +1,119 @@
+%!TEX root = ../notes.tex
+\section{March 21, 2022}
+\subsection{Elliptic Curve Elgamal}
+As usual, we have some public knowledge, private key, and public key. The idea  is to replace multiplication in $\FF_p^\times$ with addition on $E$.
+\begin{mdframed}
+    \ul{Public Knowledge}: \\
+    $p$ --- prime. \\
+    $E$ --- elliptic curve over $\FF_p$. \\
+    $P \in E(\FF_p)$ --- point.
+
+    \ul{Private Key}: \\
+    $n$ --- private key.
+
+    \ul{Public Key}: \\
+    $Q = n\cdot P$ --- public key.
+
+    \ul{Encrpytion}: \\
+    Bob has a message $M\in E(\FF_p)$.
+    \begin{enumerate}
+        \item Choose random $k$.
+        \item Compute
+              \begin{align*}
+                  C_1 & = k\cdot P     \\
+                  C_2 & = M + k\cdot Q
+              \end{align*}
+              Send $(C_1, C_2)$ to Alice.
+    \end{enumerate}
+
+    \ul{Decryption}: \\
+    Alice will compute
+    \[C_2 - n\cdot C_1 = M + k\cdot Q - nk\cdot P = M\]
+\end{mdframed}
+
+We now implement this:
+
+\begin{lstlisting}
+from ec import ext_gcd, add, minus, multiply
+
+# Private key for Alice
+n = randrange(q)
+
+# Public key for Alice
+Q = multiply(P, n, a, p)
+
+def e(Q, M):
+    """Encryption Function"""
+    k = randrange(q)
+    c1 = multiply(P, k, a, p)
+    c2 = add(M, multiply(Q, k, a, p), a, p)
+    return (c1, c2)
+
+def d(n, C):
+    """Decryption Function"""
+    c1, c2 = C
+    return add(c2, minus(multiply(c1, n, a, p), p), a, p)
+\end{lstlisting}
+
+The expansion factor is $2$. Even if we think of putting our message into only the $x$ coordinate, the $y$ coordinate is determined by the $x$ coordinate so the factor is still $2$.
+
+\subsection{Elliptic Curve DSA}
+Since we have Elgamal, we can also have DSA with Elliptic Curves.
+\begin{mdframed}
+    \ul{Public Knowledge \& Public Key}: \\
+    \emph{Same as Elgamal} \\
+    $p$ --- prime. \\
+    $E$ --- elliptic curve over $\FF_p$. \\
+    $Q = n\cdot P$ --- public key.
+
+    \ul{Private Key}: \\
+    $n$ --- private key.
+
+    \ul{Signing}: \\
+    Alice has document $d\in \ZZ/q\ZZ$.
+    \begin{enumerate}
+        \item Choose random $k$.
+        \item Compute $(x, y) = k\cdot P$.
+              \begin{align*}
+                  s_1 & = x                               \\
+                  s_2 & = (d + ns_1)\cdot k^{-1} \pmod{q}
+              \end{align*}
+    \end{enumerate}
+
+    \ul{Verification}: \\
+    We can verify the signature as follows:
+    \begin{align*}
+        v_1 & = d\cdot s_2^{-1} \pmod{q} \\
+        v_2 & = s_1s_2^{-1} \pmod{q}
+    \end{align*}
+    \begin{align*}
+        v_1\cdot P + v_2\cdot Q & = ds_2^{-1}\cdot P + s_1s_2^{-1} k\cdot P \\
+                                & = (d + s_1 n)s_2^{-1} P                   \\
+                                & = k P
+    \end{align*}
+    $(\text{$x$-coord of }v_1P + v_2Q) = s_1$ check to verify signature.
+\end{mdframed}
+
+Again, we can implement this: 
+\begin{lstlisting}
+from ec import *
+
+def sign(n, d):
+    """Signing document d with private key n"""
+    k = randrange(q)
+    x, _ = multiply(P, k, a, p)
+    s1 = x
+    s2 = ((d + n * s1) * ext_gcd(k, q)[0]) % q
+    return (s1, s2)
+
+def verify(Q, d, s):
+    """Verifies document d's signature s with public key Q"""
+    s1, s2 = s
+    v1 = (d * ext_gcd(s2, q)[0]) % q
+    v2 = (s1 * ext_gcd(s2, q)[0]) % q
+    return add(multiply(P, v1, a, p), multiply(Q, v2, a, p), a, p)[0] == s1
+\end{lstlisting}
+
+\begin{remark}
+    The specific numbers used in lecture is the elliptic curve used in the Bitcoin blockchain. Being able to forge signatures in this elliptic curve is to topple the Bitcoin market. 
+\end{remark}
