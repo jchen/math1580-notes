@@ -83,10 +83,10 @@ def add(P1, P2, a, p):
     if x1 == x2 and (y1 + y2) % p == 0:
         return O
     if P1 == P2:
-        lam = (3 + x1**2 + a) * ext_gcd(2 * y1, p)[0] % p
+        lam = (3 * x1**2 + a) * ext_gcd(2 * y1, p)[0] % p
     else:
         lam = (y2 - y1) * ext_gcd(x2 - x1, p)[0] % p
     x3 = (lam**2 - x1 - x2) % p
-    y3 = -y1 - lam * (x2 - x1)
+    y3 = (lam * (x1 - x3) - y1) % p
     return x3, y3
 \end{lstlisting}

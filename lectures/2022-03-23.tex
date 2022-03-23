@@ -1,0 +1,81 @@
+%!TEX root = ../notes.tex
+\section{March 23, 2022}
+\subsection{Elliptic Curve Factorization}
+\recall Pollard $p-1$ method.
+
+The idea to factor $N$ was we take $a\in (\ZZ/N\ZZ)^\times$ and we compute $\gcd(N, a^{n!} - 1)$ where $(p-1)\mid n!$ but $(q-1)\nmid n!$.
+
+The idea for elliptic curves is to take $P\in E(\ZZ/N\ZZ)$ and we calculate $n!\cdot P$.
+
+Let's first fix our code for composite $N$:
+\begin{lstlisting}
+def invert(a, n):
+    if gcd(a, n) == 1:
+        return ext_gcd(a, n)[0]
+    else:
+        print("OH NO!!!!!", gcd(a, n))
+
+def add(P1, P2, a, p):
+    if P1 == O:
+        return P2
+    if P2 == O:
+        return P1
+    x1, y1 = P1
+    x2, y2 = P2
+    if x1 == x2 and (y1 + y2) % p == 0:
+        return O
+    if P1 == P2:
+        lam = (3 * x1**2 + a) * invert(2 * y1, p) % p
+    else:
+        lam = (y2 - y1) * invert(x2 - x1, p) % p
+    x3 = (lam**2 - x1 - x2) % p
+    y3 = (lam * (x1 - x3) - y1) % p
+    return x3, y3
+\end{lstlisting}
+
+\begin{example}
+    We use elliptic curve $E : y^2 = x^3 + 3x + 7\mod{187}$. We calculate
+    \[5\cdot(38, 112)\]
+    which fails, since we weren't able to find the inverse of something mod $187$ which wasn't coprime. However, we figured out a factor of $187$, which is what we wanted. We found $11$ which is a prime factor of $187$.
+
+    We can, however, do this modulo each of the prime factors of $187$, $11$ and $17$. We find that
+    \begin{alignat*}{3}
+        5\cdot (38, 112) & = \cO      &  & \quad \text{ in }\FF_{11} \\
+        5\cdot (38, 112) & = (13, 13) &  & \quad \text{ in }\FF_{17}
+    \end{alignat*}
+    What happened was that we got $\cO$ mod $11$ and got not $\cO$ mod $17$.
+\end{example}
+
+In the elliptic curve method, we win if $\#E(\FF_p)\mid n!$ but $\#E(\FF_q)\nmid n!$ and so
+\begin{align*}
+    n!\cdot P & = \cO \pmod{p}   \\
+              & \neq \cO\pmod{q}
+\end{align*}
+
+We have $\#\FF_p^\times = p-1\approx p$ and $\#E(\FF_p)\approx p$, so we have about the same `chance of winning'.
+
+\begin{ques*}
+    What is the probability of success per unit time?
+\end{ques*}
+We calculate $n!\cdot P$ takes about $n\log n\approx n$ time. The probability of success is $u^{-u}$ where $u = \frac{\log p}{\log n}$. So the probability of success per unit time if $\frac{1}{n\cdot u^u}$.
+
+What minimizes $n\cdot u^u$? When $n\approx u^u$.
+
+Our crude estimate is about
+\begin{align*}
+    \log n     & \approx u\log u \approx u = \frac{\log p}{\log n} \\
+    (\log n)^2 & \approx \log p                                    \\
+    n          & \approx e^{\sqrt{\log p}}
+\end{align*}
+and our refined estimation is about
+\begin{align*}
+    \log n \approx u\log u & \approx u\log\left(\frac{\log p}{\sqrt{\log p}}\right)   \\
+                           & \approx \frac{1}{2}\log\log p\cdot \frac{\log p}{\log n} \\
+    n                      & \approx e^{\sqrt{\frac{1}{2}\log p \log\log p}}
+\end{align*}
+so our probability of success per unit time is
+\[\approx \frac{1}{n\cdot u^u}\approx \frac{1}{n^2}\approx e^{-\sqrt{2\log p \log\log p}}\]
+
+With Pollard's $p-1$ method, our probability of success will increase then decrease. With the elliptic curve method, we can optimize our probability of success by simply picking a new elliptic curve at the same $n$.
+
+This is the best known method for finding small prime factors. The runtime depends on the size of the prime factor we're trying to find instead of the number itself.
