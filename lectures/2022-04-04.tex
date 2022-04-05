@@ -1,0 +1,81 @@
+%!TEX root = ../notes.tex
+\section{April 4, 2022}
+\subsection{Quantum Computing \emph{continued}}
+\recall Deutch's Algorithm. Given black box that implements $f : \{0, 1\}\to \{0, 1\}$. We define $F : \{0, 1\}^2\to \left\{ 0, 1 \right\}^2$ via $F(x, y) = (x, f(x) + y\pmod{2})$.
+
+The problem was to determine whether $f(0) \overset{?}{=}f(1)$. Our solution was to compute $F$ on a superposition of two states.
+\[F\left(\frac{1}{\sqrt{2}}\Ket{0} + \frac{1}{\sqrt{2}}\Ket{0}, \frac{1}{\sqrt{2}}\Ket{0} - \frac{1}{\sqrt{2}}\Ket{0}\right) = \frac{1}{2}\left((-1)^{f(0)}\Ket{0} + (-1)^{f(1)}\Ket{1}\right)\otimes\left( \Ket{0} - \Ket{1} \right)\]
+where we apply a rotation to the possible outcomes. Our key transformation is
+\[(x, y)\mapsto \left( \frac{1}{\sqrt{2}}x + \frac{1}{\sqrt{2}}y,  \frac{1}{\sqrt{2}}x - \frac{1}{\sqrt{2}}y \right)\]
+which is a \emph{rotation by $45^\circ$}.
+
+We discuss a generalization of this which is the Discrete Fourier transformation.
+\begin{definition}[Discrete Fourier Transform]
+    Given $x_1, x_2, \dots, x_N$, the \ul{Discrete Fourier Transform} (DFT) is a new sequence $y_1, y_2, \dots, y_N$ defined via:
+    \[y_k = \frac{1}{\sqrt{N}}\sum_{j} e^{-\frac{2\pi i}{N}\cdot jk}x_j\]
+\end{definition}
+
+Note that this is the discrete analog of the ordinary Fourier Transform:
+\[f(x)\rightsquigarrow \hat{f}(y) = \int e^{2\pi ixy}f(x)\ dx\]
+
+\begin{example}
+    For $N = 2$, we have $x_1, x_2$ so
+    \begin{align*}
+        y_1 & = \frac{1}{\sqrt{2}}x_1 + \frac{1}{\sqrt{2}}x_2 \\
+        y_2 & = \frac{1}{\sqrt{2}}x_1 - \frac{1}{\sqrt{2}}x_2
+    \end{align*}
+\end{example}
+we note that these are efficiently computable in the quantum setting.
+
+\subsection{Shor's Algorithm}
+\begin{ques*}
+    Given a black box that implements a function $f : \ZZ \to X$ (assumed to be periodic). What is the period of $f$?
+
+    This is to say, we're promised that $f(x) = f(x + n)$ for some $n$, we are tasked to find $n$.
+\end{ques*}
+
+Classically, we take
+\[f(1), f(2), \dots, f(n+1)\]
+where $f(n+1) = f(1)$. The runtime is $\mathcal{O}(n)$.
+
+We try to solve this using a quantum algorithm:
+\begin{enumerate}
+    \item Choose $N$ large power of $2$ (we want $N = \mathcal{O}(n^2)$).
+    \item Prepare the state
+          \[\frac{1}{\sqrt{N}}\sum_{j=1}^N \Ket{j}\otimes \Ket{f(j)}.\]
+    \item Apply DFT to first register. That is,
+          \begin{align*}
+              \frac{1}{N}\sum_{k, x} \left( \sum_{j: f(j) = x} e^{-\frac{2\pi i}{N}jk} \right)\Ket{k}\oplus\Ket{x}
+          \end{align*}
+    \item Measure first register.
+\end{enumerate}
+
+How big is this sum?
+\[
+    \sum_{j: f(j) = x} e^{-\frac{2\pi i}{N}jk}
+\]
+We note that this sum
+\[
+    \sum_{j: f(j) = x} e^{-\frac{2\pi i}{N}jk} \approx \sum_{j: f(j) = x} e^{-\frac{2\pi i}{N}(j+n)k} = e^{-\frac{2\pi ink}{N}}\cdot \sum_{j: f(j) = x} e^{-\frac{2\pi i}{N}jk}
+\]
+therefore
+\[\sum_{j: f(j) = x} e^{-\frac{2\pi i}{N}jk} \approx 0\quad\text{unless}\quad e^{-\frac{2\pi ink}{N}}\approx 1 \iff nk\text{ is close to a multiple of $N$}\]
+This is to say, $k$ is approximately a multiple of $\frac{N}{n}$. So we get $\frac{N}{n}$ out of this register.
+
+\emph{Why might I get a multiple?}
+\begin{example}
+    Consider sequence
+    \[\boxed{0, 1, 0, 1, 0, 1, 0, 0}, 0, 1, 0, 1, 0, 1, 0, 0, , 0, 1, 0, 1, 0, 1, 0, 0, \dots\]
+    where the period is $8$. We'll usually get $\approx \frac{N}{\text{period}}$ unless there is a smaller ``almost-period'' where we might get $\frac{N}{\text{almost-period}}$ but the almost-period divides the period.
+\end{example}
+
+The runtime of this algorithm is $\approx \log n$.
+
+\subsection{Breaking Encryption}
+\subsubsection{Integer Factorization}
+We're given $N = pq$. We pick $x\in \ZZ/N\ZZ$ and consider the function $f(j) = x^j\pmod{N}$. Applying Shor's Algorithm, we can determine the period of $f$, which is the order of $x$, which is a factor of $(p-1)(q-1)$. More precisely, $\frac{(p-1)(q-1)}{\text{something small}}$. We recover $(p-1)(q-1)$ and we can factor $N$ easily. This is bad news for RSA!
+
+\subsubsection{Quantum Elgamal/DLP}
+We have some group $G$ and $g\in G$ where we want to recover $k$ from $x=g^k$.
+
+Consider function $f(a, b) = x^a \cdot g^{-b}$ (we do a 2-dimensional DFT). $f(a, b) = f(a+1, b+k)$. So $(1, k)$ is the period of $f$. This solves the discrete log problem \emph{in any group}!
