@@ -17,16 +17,7 @@
 How might we do this as an algorithm? We want to keep track of a few things, such as $g$ (the current power), $p$ (the multiple we are building), $a$ (the remaining powers). This is akin to \emph{deconstructing the power in binary and composing our product}.
 
 \begin{algorithm}[Fast Powering Algorithm]
-    ~\begin{lstlisting}[numbers=none,language=Python]
-def pow_mod(g, a, m):
-    p = 1
-    while a != 0:
-        if a % 2 == 1:
-            p = (p * g) % m
-        a = a // 2
-        g = g**2 % m
-    return p
-    \end{lstlisting}
+    ~\lstinputlisting[numbers=none,language=Python]{code/pow_mod.py}
 \end{algorithm}
 
 \begin{example}
