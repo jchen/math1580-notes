@@ -402,3 +402,5 @@
 
 % From Math1560
 \DeclareMathOperator{\ord}{ord}
+
+\newcommand{\bvec}[1]{\mathbf{#1}}
