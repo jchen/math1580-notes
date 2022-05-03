@@ -1,0 +1,47 @@
+%!TEX root = ../notes.tex
+\section{April 25, 2022}
+\subsection{Babai's Algorithm \emph{continued}}
+
+\recall We revisit some topics from before. We reverse our original course and use \textsf{sage} instead of \textsf{numpy}. (For symbolic math).
+
+\lstinputlisting[]{code/hadamard_ratio.sage}
+
+\begin{proposition}
+    If $\bvec{v}_i$ is orthogonal, then Babai's Algorithm solves CVP.
+\end{proposition}
+\begin{proof}
+    We have some
+    \[\bvec{w} = \sum a_i\bvec{v}_i\]
+    and we want to minimize
+    \begin{align*}
+        \left\lVert \bvec{w} - \sum \alpha_i\bvec{v}_i\right\rVert^2
+         & = \left\lVert \sum(a_i - \alpha_i)\bvec{v}_i\right\rVert^2 \\
+         & = \sum (a_i - \alpha_i)^2||\bvec{v}_i||^2
+    \end{align*}
+    and this is minimized when $\alpha_i$ is the closest integer to $a_i$ for all $i$.
+\end{proof}
+
+We start using this theory of lattices to develop cryptosystems\dots
+
+\subsection{GGH Cryptosystem: Digital Signatures}
+\ul{Alice}: Chooses $\{\bvec{v}_i\}$ a good basis for some lattice. This is Alice's \emph{private key}.
+
+Alice computes a \emph{bad basis} $\bvec{w}_i = U\cdot \bvec{v}_i$ (for $n\times n$ matrix $U$ with $\det U = 1$). Note that $\bvec{w}_i$ is still a basis for the same lattice.
+
+\emph{How does Alice sign a document $\bvec{d}\in\ZZ^n$? }
+\begin{enumerate}
+    \item Apply Babai's algorithm to find a close lattice vector.
+    \item Express answer $\sum a_i\bvec{w}_i$ in the bad basis.
+\end{enumerate}
+
+\emph{How does Bob verify that this is the correct document? }
+
+Bob checks how close the document $\bvec{b}$ to $\sum a_i \bvec{w}_i$.
+
+\emph{How do we generate $U$?}
+\begin{enumerate}
+    \item Start with identity matrix $I$.
+    \item Apply some random row operations.
+\end{enumerate}
+
+(Code is in \textsf{lattices.ipynb})

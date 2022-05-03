@@ -1,4 +1,4 @@
-from math import sqrt
+from sympy import sqrt, Rational
 
 
 def dot(v: list[int], w: list[int]) -> int:
@@ -47,7 +47,7 @@ def gs(L: list[list[int]]) -> list[list[int]]:
     M = []
     for v in L:
         for w in M:
-            mu = dot(w, v) / dot(w, w)
+            mu = Rational(dot(w, v), dot(w, w))
             v = [v_i - mu * w_i for v_i, w_i in zip(v, w)]
         M.append(v)
     # Uncomment below if we want orthonormal basis:

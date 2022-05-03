@@ -1,0 +1,51 @@
+%!TEX root = ../notes.tex
+\section{May 2, 2022}
+\subsection{LLL Reduction}
+\ul{Problem}: Given a lattice, find a good basis for the given lattice. Let's say we have
+\begin{align*}
+    \mathcal{B}  & = (\bvec{v}_1, \bvec{v}_2, \dots, \bvec{v}_n)    \\
+    \mathcal{B}' & = (\bvec{v}_1', \bvec{v}_2', \dots, \bvec{v}_n')
+\end{align*}
+where $\mathcal{B}'$ is the corresponding vector space obtained from Gram-Schmidt. Note that this is \emph{not} a basis of the lattice.
+
+We have
+\[\bvec{v}_i' = \bvec{v}_i - \sum_{j < i}\mu_{ij}\bvec{v}_j'\]
+where $\mu_{ij} = \frac{\bvec{v}_i\cdot \bvec{v}_j'}{\bvec{v}_i'\cdot\bvec{v}_i'}$.
+
+What do we know about $\det\{\bvec{v}_i\}$ and $\det\{\bvec{v}_i'\}$? We note that $\det\{\bvec{v}_i\} = \det\{\bvec{v}_i'\}$. This is as our row/column operations (except scaling) don't change determinant.
+
+\ul{Ideas}:
+
+We want some $\bvec{v}_1, \bvec{v}_2, \dots, \bvec{v}_n$ are approximately orthogonal.
+
+We want $\bvec{v}_1 \leq \bvec{v}_2 \leq \dots \leq \bvec{v}_n$ (approximately sorted).
+
+\begin{definition}[LLL Reduction]
+    $\mathcal{B}$ is LLL reduced if
+    \begin{enumerate}
+        \item \emph{We want a measure of orthogonality, so we bound $\mu_{ij}$ from Gram-Schmidt to a certain value. }
+
+              We have that
+              \[\boxed{|\mu_{ij}| = \left\lvert\frac{\bvec{v}_i\cdot \bvec{v}_j'}{\bvec{v}_i'\cdot\bvec{v}_i'}\right\rvert\leq \frac{1}{2}}\]
+        \item \emph{We want our measure in a way that failure of exact orthogonality doesn't contribute.}
+
+              We take the projection of $\bvec{v}_{i-1}$ onto
+              \[\langle\bvec{v}_1, \dots, \bvec{v}_{i-2}\rangle^\perp\]
+              and compare that with the length of the projection of $\bvec{v}_i$ onto
+              \[\langle\bvec{v}_1, \dots, \bvec{v}_{i-1}\rangle^\perp\]
+              We want
+                  {\small
+                      \[\frac{3}{4}\left|\left|\ \text{Projection of $\bvec{v}_{i-1}$ onto } \langle\bvec{v}_1, \dots, \bvec{v}_{i-2}\rangle^\perp\right|\right|\leq \left|\left|\ \text{Projection of $\bvec{v}_{i}$ onto } \langle\bvec{v}_1, \dots, \bvec{v}_{i-1}\rangle^\perp\right|\right|\]
+                  }
+              \emph{Noting that $\frac{3}{4}$ was arbitrarly chosen as a `fudge factor'.}
+
+              So we have
+              \[\frac{3}{4}||\bvec{v}_{i-1}||^2\leq ||\bvec{v}_i' + \mu_{i-1, i}\cdot\bvec{v}_{i-1}'||^2 = ||\bvec{v}_i||^2 + \mu_{i-1, i}^2\cdot||\bvec{v}_{i-1}'||\]
+              so then
+              \[\boxed{||\bvec{v}_i^2||\geq\left( \frac{3}{4} - \mu_{i-1, i}^2 \right)\cdot ||\bvec{v}_{i-1}'||^2}\]
+    \end{enumerate}
+\end{definition}
+
+Our goal is that we want an algorithm to find an LLL basis. Additionally, once we do find an LLL basis, we want to know that it will be sufficiently orthogonal.
+
+Code in \textsf{lll.ipynb}.

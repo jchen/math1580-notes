@@ -1,0 +1,65 @@
+%!TEX root = ../notes.tex
+\section{April 18, 2022}
+\subsection{Midterm 2 Review}
+\begin{itemize}
+    \item Apologies for poor communication.
+    \item Feedback is welcome---will send out form.
+\end{itemize}
+\emph{Average:} 28/40.
+
+``A-level work'' would equate to doing around 3 problems, \\
+``B-level work'' would equate to doing around 2 problems, and \\
+``C-level work'' would equate to doing around 1 problem.
+
+
+\begin{problem}
+\emph{About 3/4 solved.}
+
+\ul{Idea}: exploit something special about $n$ being a Carmichael number. That is that $a^{N-1}\equiv 1\pmod{N}$. We can do something inspired by the Miller-Rabin test. We then have
+\[\left( a^{\frac{N-1}{2}}\equiv 1\pmod{N} \right)\]
+If $a^{\frac{N-1}{2}}\equiv 1$, then we decrement the exponent by a factor of two. We then check
+\[\left( a^{\frac{N-1}{4}}\equiv 1\pmod{N} \right)\]
+and so on. Eventually, we'll find a nontrivial square root of $1$. This produces a factorization, since
+\begin{align*}
+    x^2        & \equiv 1\pmod{n} \\
+    (x-1)(x+1) & \equiv 0\pmod{n}
+\end{align*}
+so $\gcd(x\pm 1, n)$ likely allows us to recover a factor of $N$. We run through this multiple times with different values of $a$.
+\end{problem}
+
+\begin{problem}
+\emph{Hardest problem, 1/2 solved.}
+
+\ul{Idea}: Implement some reasonably general-purpose factorization method:
+\begin{enumerate}
+    \item Lenstra's Elliptic Curve Factorization.
+    \item Quadratic Sieve.
+    \item Pollard $\rho$ method.
+\end{enumerate}
+
+Things that would not work:
+\begin{enumerate}
+    \item Trial division.
+    \item Pollard $p-1$.
+\end{enumerate}
+
+The factorization was $15\times 35$ digits, which gives a relatively equal runtime for Elliptic Curve and Quadratic Sieve.
+\end{problem}
+
+\begin{problem}
+\emph{About 2/3 solved (generally speaking, lost 3 points on it).}
+
+\ul{Idea}: solve DLP. Babystep-Giantstep, as in class, yields 7/10 due to excessive memory usage. 4 people solved this problem in a way that didn't use a shit-ton of RAM, with 3 distinct solutions.
+
+\emph{How to solve DLP without using tons of RAM:}
+\begin{enumerate}
+    \item Babystep-Giantstep with fewer babysteps ($B$ babysteps). We need $B + \frac{N}{B}$ time to solve this, which is minimized if $B\equiv N^{0.5}$. We take a smaller $B\equiv N^{0.3}$ or something, and our time would be $N^{0.7}$, still within the bounds.
+    \item Index calculus. Time/Memory are asymptotically small compared to Babystep-Giantstep.
+    \item Pollard $\rho$ method \emph{(discussion of which is in textbook)}. Gives runtime of $N^{0.5}$ with minimal memory usage.
+\end{enumerate}
+
+\end{problem}
+
+\begin{problem}
+\emph{This was a fairly easy problem.}
+\end{problem}

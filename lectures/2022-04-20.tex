@@ -1,0 +1,87 @@
+%!TEX root = ../notes.tex
+\section{April 20, 2022}
+\subsection{Short Vectors}
+\begin{ques*}
+    How short is the shortest vector in a lattice $L$?
+\end{ques*}
+
+A more general question we could ask:
+\begin{ques*}
+    When does some region contain a nontrivial lattice point?
+\end{ques*}
+
+\begin{theorem}[Minkowski's Theorem]
+    Let $L\subseteq \RR^n$ be a lattice of dimension $n$. Let $S\subseteq\RR^n$ be a \emph{bounded symmetric convex} set.
+
+    If $\mathsf{Vol}(S)>2^n\det(L)$, then $S\cap L$ contains a nonzero lattice point.
+\end{theorem}
+
+\begin{definition}[Bounded Set]
+    $\{\text{Lengths of vectors in }S\}$ is bounded.
+
+    In other words, there is some ball that contains $S$.
+\end{definition}
+
+\begin{definition}[Symmetric Set]
+    If $\bvec{v}\in S$, then $-\bvec{v}\in S$.
+\end{definition}
+
+\begin{definition}[Convex Set]
+    If $\bvec{v}, \bvec{w}$, then the line segment connecting $\bvec{v}$ and $\bvec{w}$ is a subset of $S$.
+\end{definition}
+
+\begin{proof}[Proof of Minkowski's Theorem]
+    Let $\mathcal{F}$ be a fundamental domain.
+
+    Any vector $\bvec{w} = t(\bvec{w}) + v(\bvec{w})$ where $t(\bvec{w})\in \mathcal{F}$ and $v(\bvec{w})\in L$.
+
+    Consider map $t: \frac{1}{2}S \mapsto F$ by sending every vector $t: \bvec{w}\mapsto t(\bvec{w})$.
+
+    What does $t$ do to volume? We cut $S$ up into finite number of regions, and `cut-and-paste' them into the fundamental domain.
+
+    Locally, $t$ preserves volume. When must two points in $\frac{1}{2}S$ be sent to the same point in $F$? When we have `carpet' with area greater than room area. That is to say, $\mathsf{Vol}(\frac{1}{2} S) > \mathsf{Vol}(\mathcal{F})$ implies that there is an overlapping point.
+
+    This is to say
+    \begin{align*}
+        \mathsf{Vol}\left(\frac{1}{2} S\right) & > \mathsf{Vol}(\mathcal{F})           \\
+        \frac{1}{2^n}\mathsf{Vol}(S)           & > \mathsf{Vol}(\mathcal{F}) = \det(L) \\
+        \mathsf{Vol}(S)                        & > 2^n \det(L)
+    \end{align*}
+
+    So given this inequality, there are two points in $\frac{1}{2}S$ such that $t\left( \frac{1}{2}\bvec{w}_1 \right) = t\left( \frac{1}{2}\bvec{w}_2 \right)$. Then we know that
+    \[\frac{1}{2}\bvec{w}_1 - \frac{1}{2}\bvec{w}_2 \in L\]
+    So then consider
+    \[\frac{1}{2}\bvec{w}_1 - \frac{1}{2}\bvec{w}_2 = \frac{1}{2}(\bvec{w}_1 - \bvec{w}_2)\]
+    which is the midpoint of $\bvec{w}_1$ and $\bvec{w}_2$, which is in $S$ and in $L$. So $S$ contains a nonzero lattice point.
+\end{proof}
+
+\begin{theorem}[Variant of Minkowski's Theorem]
+    If $S\subseteq \RR^n$ is bounded, symmetric, convex and \emph{closed} set, then if
+    \[\mathsf{Vol}(S)\geq 2^n\det(L)\]
+    $S\cap L$ contains a nonzero lattice point.
+\end{theorem}
+\begin{definition}[Closed Set]
+    Every limit point of $S$ is contained in $S$.
+\end{definition}
+\emph{We added the condition that $S$ be closed, and changed our bound to be a $\geq$. }
+\begin{proof}[Proof of variant]
+    For any $k$:
+    \[\left( 1 + \frac{1}{k} \right)S \cap L\]
+    contains $\bvec{v}_k\neq \bvec{0}\in L$ (which is true by our first version).
+
+    The sequence $\bvec{v}_1, \bvec{v}_2, \bvec{v}_3, \dots$ is a sequence in $2S\cap L$. $2S$ is bounded, so we have a finite set of lattice points. There's some $\bvec{v}\neq \bvec{0}$ is contained in $\bigcap_{k}\left( 1 + \frac{1}{k} \right) S = S$ because $S$ is closed.
+\end{proof}
+\begin{corollary}[Hermite's Theorem]
+    Let $L$ be a lattice of dimension $n$ in $\RR^n$. Then, $L$ contains a vector $\bvec{v}$ with
+    \[||\bvec{v|}|\leq \sqrt{n}\cdot \det(L)^\frac{1}{n}\]
+\end{corollary}
+\begin{proof}
+    \emph{Application of Minkowski's Theorem.} Apply Minkowski's Theorem to
+    \[\left\{ (x_1, \dots, x_n)\Bigm\vert |x_i|\leq \det(L)^{1/n} \right\}\]
+    which is a cube with side length $2\cdot \det(L)^{1/n}$. So $\textsf{Vol}(S) = 2^n\cdot \det(L)$. The diagonal has length $\sqrt{n}\det(L)^{1/n}$.
+\end{proof}
+A variant of Hermite's Theorem is that we can find an entire basis $\bvec{v}_1, \bvec{v}_2, \dots, \bvec{v}_n$ such that
+\[||\bvec{v}_1||\cdot||\bvec{v}_2||\cdots ||\bvec{v}_n|| \leq n^{n/2}\det(L)\]
+and we define the Hadamard ratio to be
+\[\mathcal{H} = \left( \frac{\det(L)}{||\bvec{v}_1||\cdot||\bvec{v}_2||\cdots ||\bvec{v}_n||} \right)^{1/n}\]
+where $0< \mathcal{H} \leq 1$ and $\mathcal{H} = 1$ when our basis is orthogonal.

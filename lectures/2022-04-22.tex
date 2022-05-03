@@ -1,0 +1,72 @@
+%!TEX root = ../notes.tex
+\section{April 22, 2022}
+\subsection{Short Vectors \emph{continued}}
+\recall last class we stated Hermite's Theorem:
+\begin{theorem*}[Hermite's Theorem]
+    Let $L$ be a lattice of dimension $n$. Then $0\neq v\in L$ with
+    \[||\bvec{v|}|\leq \sqrt{n}\cdot \det(L)^\frac{1}{n}\]
+\end{theorem*}
+\begin{proof}
+    Apply Minkowski's Theorem to the cube
+    \[S = \left\{ (x_1, \dots, x_n) \Bigm\vert -\det(L)^{1/n}\leq x_i \leq \det(L)^{1/n} \right\}\]
+    Minkowski's states that $S$ contains a nonzero lattice vector. By inspection, this lattice vector $\bvec{v}\in S$ implies that
+    \[||\bvec{v}|| \leq \underbrace{\sqrt{(\det(L)^{1/n})^2 + \cdots + (\det(L)^{1/n})^2}}_{n\text{ times}} = \sqrt{n}(\det(L)^{1/n})\]
+\end{proof}
+
+\begin{theorem*}[Variant of Hermite's Theorem]
+    There is a basis $\bvec{v}_1, \dots, \bvec{v}_n$ with
+    \[||\bvec{v}_1||\cdot||\bvec{v}_2||\cdots ||\bvec{v}_n|| \leq n^{n/2}\det(L)\]
+\end{theorem*}
+\begin{definition}[Hadamard Ratio]
+    The \ul{Hadamard Ratio} is
+    \[\mathcal{H} = \left( \frac{|\det(L)|}{||\bvec{v}_1||\cdot||\bvec{v}_2||\cdots ||\bvec{v}_n||} \right)^{1/n}\]
+\end{definition}
+
+The variant of Hermite's Theorem says that there is a basis for which $\mathcal{H}\geq \frac{1}{\sqrt{n}}$. For any basis, $0 < \mathcal{H}\leq 1$. $\mathcal{H} = 1$ if and only if our basis is orthogonal.
+
+This ratio makes precise how orthogonal our basis is.
+
+We can write this in code (\emph{now enhanced with NumPy!}):
+\lstinputlisting[]{code/linalg_np.py}
+
+Instead of using a hypercube, we can use a hypersphere. Let
+\[S = B_R(\bvec{0}),\]
+a ball with radius $R$ centered at $0$. Minkowski's theorem says $S$ contains a nonzero lattice vector if $\textsf{Vol}(B_R(\bvec{0})) \geq 2^n\cdot \det(L)$. Let $\textsf{Vol}(B_R(\bvec{0})) = C_n\cdot R^n$ where $C_n$ is the volume of a unit ball in $n$ dimensions.
+
+This is also to say that
+\[R\geq \frac{2}{C_n^{1/n}}\det(L)^{1/n}\]
+Fact from analysis/calculus (Stirling's Formula):
+\[\lim_{n\to\infty}C_n^{1/n}\cdot\sqrt{n} = \sqrt{2\pi e}.\]
+The key point is
+\[R\geq \frac{2}{C_n^{1/n}}\det(L)^{1/n} \approx \sqrt{\frac{2}{\pi e}}\sqrt{n}(\det(L))^{1/n}\]
+
+\begin{ques*}
+    What is the real truth? Given a random lattice, how long is the shortest vector? What is the actual length (probably)?
+\end{ques*}
+How many lattice points \emph{``should''} a ball of radius $R$ contain? Probably the volume divided by the volume of the fundamental domain:
+\[\frac{\mathsf{Vol}(S)}{\mathsf{Vol(\mathcal{F})}} = \frac{\mathsf{Vol}(S)}{\det(L)}.\]
+So when \emph{should} $B_R(\textbf{0})$ contain nonzero $\bvec{v}\in L$? This is probably when $\mathsf{Vol}(B_R(\bvec{0})) \geq \det(L)$.
+
+It's around when
+\[R \geq \sqrt{\frac{1}{2\pi e}}\sqrt{n}(\det(L))^{1/n}\]
+
+\begin{definition}[Gaussian Expected Shortest Length]
+    $\sigma(L) = \sqrt{\frac{n}{2\pi e}}\cdot (\det(L))^{1/n}$ is called the \ul{Gaussian expected shortest length}.
+\end{definition}
+We \emph{expect} $||\bvec{v}_\mathsf{shortest}||\approx\sigma(L)$. We \emph{know} $||\bvec{v}_\mathsf{shortest}||\lesssim 2\cdot \sigma(L)$
+
+\subsection{Babai's Algorithm}
+\emph{Goal:} we want to solve, approximately, the closest vector problem. We have $L\subseteq\RR^n$ with basis $\bvec{v}_1, \dots, \bvec{v}_n$. We have some $\bvec{w}\in\RR^n$. We want to find a close lattice vector to $\bvec{w}$. That is, we want \[a_1, a_2, \dots, a_n\in\ZZ\] where $||\bvec{w} - \sum a_i\bvec{v}_i||$ is small.
+
+\emph{Method:}
+\begin{enumerate}
+    \item Write $\bvec{w} = \alpha_1\bvec{v}_1 + \cdots \alpha_n\bvec{v}_n$.
+    \item Round $\alpha_i$ to nearest integer $a_i$.
+\end{enumerate}
+
+\begin{ques*}
+    When does this work well?
+\end{ques*}
+
+We implement this in code:
+\lstinputlisting[]{code/babai.py}

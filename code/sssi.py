@@ -1,6 +1,3 @@
-from crypto import gcd, ext_gcd
-
-
 def sssi(M, s):
     L = []
     for i in M[::-1]:
